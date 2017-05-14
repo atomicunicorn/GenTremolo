@@ -59,6 +59,7 @@ public:
     float lfo(float phase, int waveform);
     int getSamplesPerBeat(int beatIndicator, double bpm);
     float getNewTremFrequencyFromBpmGrid();
+    float getUpdatedTremFrequency(double bpm);
     
     enum BeatIndicators
     {
@@ -81,7 +82,8 @@ public:
     bool isRandom;
 
 private:
-    
+    float min_frequency = 0.5;
+    float max_frequency = 8.0;
     int blockCounter;
     float trem_frequency = 2.0;
     float trem_depth = 1.0;

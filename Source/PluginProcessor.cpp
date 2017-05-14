@@ -199,30 +199,27 @@ float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     blockCounter++;
-    if ((blockCounter % 10) == 0 && isRandom) {
-        blockCounter = 1;
-        trem_frequency = (rand() / (float)RAND_MAX * 8.0) + 0.5;  // TODO replace 8.0 with maxFreq variable
+    if (isRandom && ((blockCounter % 10) == 0)) {
+        blockCounter = 1;  // Need to do a better way of updating frequency during matching grid
+        trem_beat_indicator = BeatIndicators(rand() % 5);
     }
-        
+    
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
-//    AudioPlayHead* const playHead = getPlayHead();
-//    AudioPlayHead::CurrentPositionInfo result;
-//    double bpm = 120.0;
-//    if (playHead != nullptr) {
-//        GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result);
-//        bpm = result.bpm;
-//    }
+    AudioPlayHead* const playHead = getPlayHead();
+    AudioPlayHead::CurrentPositionInfo result = {};
+    double bpm = 120.0;
+    if (playHead != nullptr) {
+        if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result))
+            bpm = result.bpm;
+    }
+    if (isRandom)
+        trem_frequency = getUpdatedTremFrequency(bpm);
+    
 //    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
     // TODO create anchor sample and check if hit a multiple of the samples perbeat after anchor sample
     // TODO randomly update the new tremolo frequency / trem beat indicator
-    
-    // 1) SINE WAVE CARRIER:
-    // v(t) = (Ec + em) * sin(2*PI*Freq*t) ==> [ Ec + Em * sin(2*PI*Freq*t) ] sin(2*PI*Freq*t)
-    // Ec = carrier wave
-    // em = Em*sin(2*PI*Freq*t) instantaneous amplitude of the modulating signal
-    // panL = panR = 1;
     
     int channel;
     float temp_trem_lfo_phase_copy;
@@ -230,6 +227,9 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         float* channelData = buffer.getWritePointer(channel);
         temp_trem_lfo_phase_copy = trem_lfo_phase;
         for (int i = 0; i < numSamples; i++) {
+//            if (isRandom && ((i % samplesPerBeat) == 0)) {
+//                updateTremFrequency(bpm);
+//            }
             const float in = channelData[i];
             // multiply the waveform by the periodic carrier signal
             channelData[i] = in * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
@@ -251,6 +251,23 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     {
         buffer.clear (i, 0, buffer.getNumSamples());
+    }
+}
+
+float GenTremoloAudioProcessor::getUpdatedTremFrequency(double bpm) {
+    switch (trem_beat_indicator) {
+        case k4th:
+            return bpm / 60.0;
+        case k8th:
+            return bpm / 30.0;
+        case k16th:
+            return bpm / 15.0;
+        case k32nd:
+            return bpm / 7.5;
+        case k64th:
+            return bpm / 3.75;
+        default:
+            return bpm / 60.0;
     }
 }
 
