@@ -17,7 +17,7 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, public Timer
 {
 public:
     GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor&);
@@ -26,8 +26,11 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+    void timerCallback() override;
+    String getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam);
 
 private:
+    Label* beatLabel;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     GenTremoloAudioProcessor& processor;

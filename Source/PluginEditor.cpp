@@ -18,7 +18,14 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (500, 400);
+//    depthLabel_.attachToComponent(&depthSlider_, false);
+//    depthLabel_.setFont(Font (11.0f));
+    beatLabel = new Label("Beat", "Beat");
+    beatLabel->attachToComponent(beatLabel, false);
+    beatLabel->setFont(Font(11.0f));
+    addAndMakeVisible(beatLabel);
+    startTimer(50);
 }
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
@@ -33,7 +40,38 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Gen Tremolo", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Gen Tremolo a", getLocalBounds(), Justification::centred, 1);
+}
+
+void GenTremoloAudioProcessorEditor::timerCallback() {
+    const OwnedArray<AudioProcessorParameter> &params = processor.getParameters();
+    for (int i = 0; i < params.size(); ++i)
+    {
+        if (const AudioParameterInt* param = dynamic_cast<AudioParameterInt*> (params[i])) {
+            const String paramString = param->name;
+            if (paramString.compare("Beat") == 0) {
+                beatLabel->setText(getBeatLabelTextFromBeatParameterValue(param), dontSendNotification);
+            }
+        }
+    }
+}
+
+String GenTremoloAudioProcessorEditor::getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam) {
+    switch(beatParam->get()) {
+        case 1:
+            return "1/4th";
+        case 2:
+            return "1/8th";
+        case 3:
+            return "1/16th";
+        case 4:
+            return "1/32nd";
+        case 5:
+            return "1/64th";
+        default:
+            return "1/4th";
+    }
+    return "n/a";
 }
 
 void GenTremoloAudioProcessorEditor::resized()

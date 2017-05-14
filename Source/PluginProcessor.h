@@ -57,7 +57,17 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     float lfo(float phase, int waveform);
+    int getSamplesPerBeat(int beatIndicator, double bpm);
     float getNewTremFrequencyFromBpmGrid();
+    
+    enum BeatIndicators
+    {
+        k4th = 1,
+        k8th,
+        k16th,
+        k32nd,
+        k64th
+    };
     
     enum Waveforms
     {
@@ -67,10 +77,13 @@ public:
         kWaveformSquareSlopedEdges,
         kNumWaveforms
     };
+    AudioParameterInt* beatParam;
 
 private:
+    
     float trem_frequency = 2.0;
     float trem_depth = 1.0;
+    int trem_beat_indicator;
     int trem_waveform_indicator;
     float trem_lfo_phase = 0.0;
     float sample_frequency = 1.0/44100.0;

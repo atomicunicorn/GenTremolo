@@ -26,11 +26,18 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
 #endif
 {
     // Set default values:
+    trem_beat_indicator = k4th;
     trem_frequency = 2.0;
     trem_depth = 1.0;
     trem_waveform_indicator = kWaveformSine;
     trem_lfo_phase = 0.0;
-    sample_frequency = 1.0/44100.0;
+    sample_frequency = 1.0/44100.0; // TODO update this to pull sample rate from host
+    
+    addParameter(beatParam = new AudioParameterInt ("beatParam", // parameter ID
+                                                 "Beat", // parameter name
+                                                 1,   // mininum value
+                                                 5,   // maximum value
+                                                 1)); // default value)
 }
 
 GenTremoloAudioProcessor::~GenTremoloAudioProcessor()
@@ -160,8 +167,31 @@ float GenTremoloAudioProcessor::lfo(float phase, int waveform)
     }
 }
 
+// TODO may need to return a double instead of an int
+int GenTremoloAudioProcessor::getSamplesPerBeat(int beatIndicator, double bpm) {
+    double sampleRate = GenTremoloAudioProcessor::getSampleRate();
+    if (bpm <= 0)
+        return 60.0*sampleRate/120.0;
+    double quarterNoteSampleLength = 60.0*sampleRate/bpm;
+    switch (beatIndicator) {
+        case k4th:
+            return quarterNoteSampleLength;
+        case k8th:
+            return quarterNoteSampleLength/2;
+        case k16th:
+            return quarterNoteSampleLength/4;
+        case k32nd:
+            return quarterNoteSampleLength/8;
+        case k64th:
+            return quarterNoteSampleLength/16;
+        default:
+            return quarterNoteSampleLength;
+    }
+}
+
+// TODO implement
 float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
-    
+    return 0.0;
 }
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
@@ -169,6 +199,15 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
+    AudioPlayHead* const playHead = getPlayHead();
+    AudioPlayHead::CurrentPositionInfo result;
+    double bpm = 120.0;
+    if (playHead != nullptr) {
+        GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result);
+        bpm = result.bpm;
+    }
+    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
+    // TODO randomly update the new tremolo frequency / trem beat indicator
     
     // 1) SINE WAVE CARRIER:
     // v(t) = (Ec + em) * sin(2*PI*Freq*t) ==> [ Ec + Em * sin(2*PI*Freq*t) ] sin(2*PI*Freq*t)
@@ -223,12 +262,14 @@ void GenTremoloAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    MemoryOutputStream (destData, true).writeInt (*beatParam);
 }
 
 void GenTremoloAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    *beatParam =  MemoryInputStream (data, static_cast<size_t> (sizeInBytes), false).readInt();
 }
 
 //==============================================================================
