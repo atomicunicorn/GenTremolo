@@ -17,7 +17,7 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, public Timer
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private Button::Listener //, public Timer
 {
 public:
     GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor&);
@@ -26,14 +26,16 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    void timerCallback() override;
+//    void timerCallback() override;
     String getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam);
+    void buttonClicked (Button* button) override;
 
 private:
-    Label* beatLabel;
+//    Label* beatLabel;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     GenTremoloAudioProcessor& processor;
+    TextButton randomButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenTremoloAudioProcessorEditor)
 };

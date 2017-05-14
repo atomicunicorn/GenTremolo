@@ -63,10 +63,10 @@ public:
     enum BeatIndicators
     {
         k4th = 1,
-        k8th,
-        k16th,
-        k32nd,
-        k64th
+        k8th = 2,
+        k16th = 3,
+        k32nd = 4,
+        k64th = 5
     };
     
     enum Waveforms
@@ -78,9 +78,11 @@ public:
         kNumWaveforms
     };
     AudioParameterInt* beatParam;
+    bool isRandom;
 
 private:
     
+    int blockCounter;
     float trem_frequency = 2.0;
     float trem_depth = 1.0;
     int trem_beat_indicator;

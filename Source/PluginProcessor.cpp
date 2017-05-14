@@ -32,6 +32,8 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
     trem_waveform_indicator = kWaveformSine;
     trem_lfo_phase = 0.0;
     sample_frequency = 1.0/44100.0; // TODO update this to pull sample rate from host
+    isRandom = false;
+    blockCounter = 1;
     
     addParameter(beatParam = new AudioParameterInt ("beatParam", // parameter ID
                                                  "Beat", // parameter name
@@ -196,17 +198,24 @@ float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
+    blockCounter++;
+    if ((blockCounter % 10) == 0 && isRandom) {
+        blockCounter = 1;
+        trem_frequency = (rand() / (float)RAND_MAX * 8.0) + 0.5;  // TODO replace 8.0 with maxFreq variable
+    }
+        
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
-    AudioPlayHead* const playHead = getPlayHead();
-    AudioPlayHead::CurrentPositionInfo result;
-    double bpm = 120.0;
-    if (playHead != nullptr) {
-        GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result);
-        bpm = result.bpm;
-    }
-    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
+//    AudioPlayHead* const playHead = getPlayHead();
+//    AudioPlayHead::CurrentPositionInfo result;
+//    double bpm = 120.0;
+//    if (playHead != nullptr) {
+//        GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result);
+//        bpm = result.bpm;
+//    }
+//    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
+    // TODO create anchor sample and check if hit a multiple of the samples perbeat after anchor sample
     // TODO randomly update the new tremolo frequency / trem beat indicator
     
     // 1) SINE WAVE CARRIER:
