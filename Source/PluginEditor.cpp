@@ -19,16 +19,22 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (500, 400);
-//    depthLabel_.attachToComponent(&depthSlider_, false);
-//    depthLabel_.setFont(Font (11.0f));
-//    beatLabel = new Label("Beat", "Beat");
-//    beatLabel->attachToComponent(beatLabel, false);
-//    beatLabel->setFont(Font(11.0f));
-//    addAndMakeVisible(beatLabel);
-//    startTimer(50);
+    
+    /* buttons */
     addAndMakeVisible (&randomButton);
     randomButton.setButtonText ("Randomize off");
     randomButton.addListener(this);
+    
+    /* combo boxes */
+//    waveformComboBox.addItemList(waveformStringList, 0)
+    waveformComboBox.addItem("sine", 1);
+    waveformComboBox.addItem("sloped-square", 2);
+    waveformComboBox.addItem("triangle", 3);
+    waveformComboBox.addItem("square", 4);
+    waveformComboBox.addSeparator();
+    waveformComboBox.setText("sloped-square");
+    addAndMakeVisible(&waveformComboBox);
+    // TODO finish initializing the waveform combobox
 }
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
@@ -84,7 +90,29 @@ void GenTremoloAudioProcessorEditor::buttonClicked (Button* button) {
             randomButton.setButtonText("Randomize on");
         if (!processor.isRandom)
             randomButton.setButtonText("Randomize off");
-//        timeLabel.setText (currentTimeString, dontSendNotification);
+    }
+}
+
+// TODO get this to work
+void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
+    if (comboBox == &waveformComboBox) {
+        switch (comboBox->getSelectedId()) {
+            case 1:
+                processor.trem_waveform_indicator = 1;
+                break;
+            case 2:
+                processor.trem_waveform_indicator = 2;
+                break;
+            case 3:
+                processor.trem_waveform_indicator = 3;
+                break;
+            case 4:
+                processor.trem_waveform_indicator = 4;
+                break;
+            default:
+                processor.trem_waveform_indicator = 1;
+                break;
+        }
     }
 }
 
@@ -93,4 +121,6 @@ void GenTremoloAudioProcessorEditor::resized()
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
     randomButton.setBounds (40, 30, getWidth() - 100, getHeight()/4);
+    // TODO add the waveform combo box to this.
+    waveformComboBox.setBounds(100, 40 + getHeight()/5, getWidth()/4, getHeight()/5);
 }

@@ -29,11 +29,13 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
     trem_beat_indicator = k4th;
     trem_frequency = 2.0;
     trem_depth = 1.0;
-    trem_waveform_indicator = kWaveformSine;
+    trem_waveform_indicator = kWaveformSquareSlopedEdges; //kWaveformSine;
     trem_lfo_phase = 0.0;
     sample_frequency = 1.0/44100.0; // TODO update this to pull sample rate from host
     isRandom = false;
     blockCounter = 1;
+    
+    sampleCounter = 0;
     
     addParameter(beatParam = new AudioParameterInt ("beatParam", // parameter ID
                                                  "Beat", // parameter name
@@ -198,11 +200,6 @@ float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    blockCounter++;
-    if (isRandom && ((blockCounter % 10) == 0)) {
-        blockCounter = 1;  // Need to do a better way of updating frequency during matching grid
-        trem_beat_indicator = BeatIndicators(rand() % 5);
-    }
     
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
@@ -214,30 +211,31 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result))
             bpm = result.bpm;
     }
-    if (isRandom)
-        trem_frequency = getUpdatedTremFrequency(bpm);
     
-//    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
+    int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
     // TODO create anchor sample and check if hit a multiple of the samples perbeat after anchor sample
     // TODO randomly update the new tremolo frequency / trem beat indicator
     
-    int channel;
     float temp_trem_lfo_phase_copy;
-    for (channel = 0; channel < totalNumInputChannels; channel++) {
-        float* channelData = buffer.getWritePointer(channel);
-        temp_trem_lfo_phase_copy = trem_lfo_phase;
-        for (int i = 0; i < numSamples; i++) {
-//            if (isRandom && ((i % samplesPerBeat) == 0)) {
-//                updateTremFrequency(bpm);
-//            }
-            const float in = channelData[i];
-            // multiply the waveform by the periodic carrier signal
-            channelData[i] = in * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
-            // Update the carrier and LFO phases, keeping them in the range 0-1
-            temp_trem_lfo_phase_copy += trem_frequency*sample_frequency;
-            if(temp_trem_lfo_phase_copy >= 1.0)
-                temp_trem_lfo_phase_copy -= 1.0;
+    float* channelDataLeft = buffer.getWritePointer(0);
+    float* channelDataRight = buffer.getWritePointer(1);
+    temp_trem_lfo_phase_copy = trem_lfo_phase;
+    for (int i = 0; i < numSamples; i++) {
+        const float inLeft = channelDataLeft[i];
+        const float inRight = channelDataRight[i];
+        if (isRandom && (sampleCounter % samplesPerBeat) == 0) {
+            trem_frequency = next_trem_frequency;
+            trem_beat_indicator = BeatIndicators(rand() % 5);
+            next_trem_frequency = getUpdatedTremFrequency(bpm);
+            sampleCounter = 0;
         }
+        channelDataLeft[i] = inLeft * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
+        channelDataRight[i] = inRight * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
+        // Update the carrier and LFO phases, keeping them in the range 0-1
+        temp_trem_lfo_phase_copy += trem_frequency*sample_frequency;
+        if(temp_trem_lfo_phase_copy >= 1.0)
+            temp_trem_lfo_phase_copy -= 1.0;
+        sampleCounter++;
     }
     
     // Having made a local copy of the state variables for each channel, now transfer the result

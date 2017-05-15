@@ -73,22 +73,24 @@ public:
     enum Waveforms
     {
         kWaveformSine = 1,
-        kWaveformTriangle,
-        kWaveformSquare,
-        kWaveformSquareSlopedEdges,
+        kWaveformTriangle = 2,
+        kWaveformSquare = 3,
+        kWaveformSquareSlopedEdges = 4,
         kNumWaveforms
     };
     AudioParameterInt* beatParam;
     bool isRandom;
+    int trem_waveform_indicator;
 
 private:
+    int sampleCounter;
     float min_frequency = 0.5;
     float max_frequency = 8.0;
     int blockCounter;
     float trem_frequency = 2.0;
+    float next_trem_frequency;
     float trem_depth = 1.0;
     int trem_beat_indicator;
-    int trem_waveform_indicator;
     float trem_lfo_phase = 0.0;
     float sample_frequency = 1.0/44100.0;
     double currentSampleRate;

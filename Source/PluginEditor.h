@@ -17,7 +17,8 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private Button::Listener //, public Timer
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor,
+private Button::Listener, private ComboBox::Listener //, public Timer
 {
 public:
     GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor&);
@@ -29,6 +30,7 @@ public:
 //    void timerCallback() override;
     String getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam);
     void buttonClicked (Button* button) override;
+    void comboBoxChanged(ComboBox* comboBox) override;
 
 private:
 //    Label* beatLabel;
@@ -36,6 +38,9 @@ private:
     // access the processor object that created it.
     GenTremoloAudioProcessor& processor;
     TextButton randomButton;
+    ComboBox waveformComboBox;
+//    const String* waveFormStrings = {"sine", "sloped-square", "square", "triangle"};
+//    const StringArray* waveformStringList = new StringArray(waveFormStrings, 4);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenTremoloAudioProcessorEditor)
 };
