@@ -28,7 +28,6 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 //    void timerCallback() override;
-    String getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam);
     void buttonClicked (Button* button) override;
     void comboBoxChanged(ComboBox* comboBox) override;
 

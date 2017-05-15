@@ -34,6 +34,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     waveformComboBox.addSeparator();
     waveformComboBox.setText("sloped-square");
     addAndMakeVisible(&waveformComboBox);
+    waveformComboBox.addListener(this);
     // TODO finish initializing the waveform combobox
 }
 
@@ -65,24 +66,6 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 //    }
 //}
 
-String GenTremoloAudioProcessorEditor::getBeatLabelTextFromBeatParameterValue(const AudioParameterInt* beatParam) {
-    switch(beatParam->get()) {
-        case 1:
-            return "1/4th";
-        case 2:
-            return "1/8th";
-        case 3:
-            return "1/16th";
-        case 4:
-            return "1/32nd";
-        case 5:
-            return "1/64th";
-        default:
-            return "1/4th";
-    }
-    return "n/a";
-}
-
 void GenTremoloAudioProcessorEditor::buttonClicked (Button* button) {
     if (button == &randomButton) {
         processor.isRandom = !processor.isRandom;
@@ -98,19 +81,19 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
     if (comboBox == &waveformComboBox) {
         switch (comboBox->getSelectedId()) {
             case 1:
-                processor.trem_waveform_indicator = 1;
+                processor.trem_waveform_indicator = GenTremoloAudioProcessor::kWaveformSine;
                 break;
             case 2:
-                processor.trem_waveform_indicator = 2;
+                processor.trem_waveform_indicator = GenTremoloAudioProcessor::kWaveformSquareSlopedEdges;
                 break;
             case 3:
-                processor.trem_waveform_indicator = 3;
+                processor.trem_waveform_indicator = GenTremoloAudioProcessor::kWaveformTriangle;
                 break;
             case 4:
-                processor.trem_waveform_indicator = 4;
+                processor.trem_waveform_indicator = GenTremoloAudioProcessor::kWaveformSquare;
                 break;
             default:
-                processor.trem_waveform_indicator = 1;
+                processor.trem_waveform_indicator = GenTremoloAudioProcessor::kWaveformSine;
                 break;
         }
     }
@@ -122,5 +105,5 @@ void GenTremoloAudioProcessorEditor::resized()
     // subcomponents in your editor..
     randomButton.setBounds (40, 30, getWidth() - 100, getHeight()/4);
     // TODO add the waveform combo box to this.
-    waveformComboBox.setBounds(100, 40 + getHeight()/5, getWidth()/4, getHeight()/5);
+    waveformComboBox.setBounds(getWidth()/2, 100 + getHeight()/4, getWidth()/3, getHeight()/5);
 }

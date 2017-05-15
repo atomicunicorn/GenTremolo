@@ -200,7 +200,7 @@ float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    
+    int randVal = 1;
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
@@ -223,9 +223,10 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     for (int i = 0; i < numSamples; i++) {
         const float inLeft = channelDataLeft[i];
         const float inRight = channelDataRight[i];
-        if (isRandom && (sampleCounter % samplesPerBeat) == 0) {
+        if (isRandom && (sampleCounter % samplesPerBeat*randVal) == 0) {
             trem_frequency = next_trem_frequency;
-            trem_beat_indicator = BeatIndicators(rand() % 5);
+            randVal = rand() + 1;
+            trem_beat_indicator = BeatIndicators(randVal % 5);
             next_trem_frequency = getUpdatedTremFrequency(bpm);
             sampleCounter = 0;
         }
