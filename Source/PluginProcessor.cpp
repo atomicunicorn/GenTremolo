@@ -33,6 +33,8 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
     trem_lfo_phase = 0.0;
     sample_frequency = 1.0/44100.0; // TODO update this to pull sample rate from host
     isRandom = false;
+    minBeat = k64th;
+    maxBeat = k2;
     blockCounter = 1;
     
     sampleCounter = 0;
@@ -213,13 +215,11 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     }
     
     int samplesPerBeat = getSamplesPerBeat(trem_beat_indicator, bpm);
-    // TODO create anchor sample and check if hit a multiple of the samples perbeat after anchor sample
-    // TODO randomly update the new tremolo frequency / trem beat indicator
-    
     float temp_trem_lfo_phase_copy;
     float* channelDataLeft = buffer.getWritePointer(0);
     float* channelDataRight = buffer.getWritePointer(1);
     temp_trem_lfo_phase_copy = trem_lfo_phase;
+    
     for (int i = 0; i < numSamples; i++) {
         const float inLeft = channelDataLeft[i];
         const float inRight = channelDataRight[i];
@@ -232,21 +232,21 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         }
         channelDataLeft[i] = inLeft * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
         channelDataRight[i] = inRight * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
-        // Update the carrier and LFO phases, keeping them in the range 0-1
+        /* Update the carrier and LFO phases, keeping them in the range 0-1 */
         temp_trem_lfo_phase_copy += trem_frequency*sample_frequency;
         if(temp_trem_lfo_phase_copy >= 1.0)
             temp_trem_lfo_phase_copy -= 1.0;
         sampleCounter++;
     }
     
-    // Having made a local copy of the state variables for each channel, now transfer the result
-    // back to the main state variable so they will be preserved for the next call of processBlock()
+    /* Having made a local copy of the state variables for each channel, now transfer the result
+     * back to the main state variable so they will be preserved for the next call of processBlock() */
     
     trem_lfo_phase = temp_trem_lfo_phase_copy;
     
-    // In case we have more outputs than inputs, we'll clear any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
+    /* In case we have more outputs than inputs, we'll clear any output
+     * channels that didn't contain input data, (because these aren't
+     * guaranteed to be empty - they may contain garbage). */
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
     {
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -255,6 +255,8 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
 float GenTremoloAudioProcessor::getUpdatedTremFrequency(double bpm) {
     switch (trem_beat_indicator) {
+        case k2:
+            return bpm / 120.0;
         case k4th:
             return bpm / 60.0;
         case k8th:

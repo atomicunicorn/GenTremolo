@@ -63,6 +63,7 @@ public:
     
     enum BeatIndicators
     {
+        k2 = 0,
         k4th = 1,
         k8th = 2,
         k16th = 3,
@@ -81,6 +82,9 @@ public:
     AudioParameterInt* beatParam;
     bool isRandom;
     int trem_waveform_indicator;
+    int trem_beat_indicator;
+    int minBeat;
+    int maxBeat;
 
 private:
     int sampleCounter;
@@ -90,7 +94,6 @@ private:
     float trem_frequency = 2.0;
     float next_trem_frequency;
     float trem_depth = 1.0;
-    int trem_beat_indicator;
     float trem_lfo_phase = 0.0;
     float sample_frequency = 1.0/44100.0;
     double currentSampleRate;
