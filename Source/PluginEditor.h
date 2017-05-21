@@ -41,6 +41,7 @@ private:
     AudioProcessorValueTreeState& valueTreeState;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> randomAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
 
     /* Components */
     ToggleButton randomToggleButton;
@@ -49,7 +50,10 @@ private:
     Slider chaosSlider;
     
     Label minBeatLabel;
-    TabbedButtonBar minBeatTabButtonBar;
+    Slider minBeatSlider;
+    
+//    Label minBeatLabel;
+//    TabbedButtonBar minBeatTabButtonBar;
     
     ComboBox waveformComboBox;
     
