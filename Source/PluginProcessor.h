@@ -58,10 +58,8 @@ public:
     
     float lfo(float phase, int waveform);
     int getSamplesPerBeat(int beatIndicator, double bpm);
-    float getNewTremFrequencyFromBpmGrid();
     float getUpdatedTremFrequency(double bpm);
-//    static String boolParamToText(float value);
-//    static float textToBoolParam(const String& text);
+    int scaleChaosParameterToInt();
     
     enum BeatIndicators
     {
