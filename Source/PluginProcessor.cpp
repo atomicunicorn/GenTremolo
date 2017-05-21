@@ -22,8 +22,9 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+parameters(*this, nullptr) // TODO point to and set up an undomanager
 {
     // Set default values:
     trem_beat_indicator = k4th;
@@ -39,11 +40,27 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
     
     sampleCounter = 0;
     
-    addParameter(beatParam = new AudioParameterInt ("beatParam", // parameter ID
-                                                 "Beat", // parameter name
-                                                 1,   // mininum value
-                                                 5,   // maximum value
-                                                 1)); // default value)
+    
+    /* initialize and add the parameters */
+    parameters.createAndAddParameter("randomParamID", "Random", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                     [](float value)
+                                     {
+                                         // value to text function
+                                         return value < 0.5 ? "Random Off" : "Random On";
+                                     },
+                                     [](const String& text)
+                                     {
+                                         // text to value function
+                                         if (text == "Random Off")    return 0.0f;
+                                         if (text == "Random On")  return 1.0f;
+                                         return 0.0f;
+                                     });   // text to value function
+    
+    parameters.state = ValueTree (Identifier ("APVTSGenTremolo"));
+    
+//    addParameter(beatParam = new AudioParameterInt ("beatParam", "Beat", 1, 5, 1));
+//    addParameter(randomParam = new AudioParameterBool("randomParamID", "Random", false));
 }
 
 GenTremoloAudioProcessor::~GenTremoloAudioProcessor()
@@ -102,6 +119,16 @@ const String GenTremoloAudioProcessor::getProgramName (int index)
 void GenTremoloAudioProcessor::changeProgramName (int index, const String& newName)
 {
 }
+
+//static String boolParamToText(float value) {
+//    return value < 0.5 ? "Random Off" : "Random On";
+//}
+//
+//static float textToBoolParam(const String& text) {
+//    if (text == "Random Off") return 0.0f;
+//    if (text == "Random On") return 1.0f;
+//    return 0.0f;
+//}
 
 //==============================================================================
 void GenTremoloAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
@@ -203,6 +230,7 @@ float GenTremoloAudioProcessor::getNewTremFrequencyFromBpmGrid() {
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     int randVal = 1;
+    isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
@@ -220,7 +248,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     float* channelDataRight = buffer.getWritePointer(1);
     temp_trem_lfo_phase_copy = trem_lfo_phase;
     
-    for (int i = 0; i < numSamples; i++) {
+    for (int i = 0; i < numSamples; i++) {  
         const float inLeft = channelDataLeft[i];
         const float inRight = channelDataRight[i];
         if (isRandom && (sampleCounter % samplesPerBeat*randVal) == 0) {
@@ -280,7 +308,7 @@ bool GenTremoloAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* GenTremoloAudioProcessor::createEditor()
 {
-    return new GenTremoloAudioProcessorEditor (*this);
+    return new GenTremoloAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================
@@ -289,14 +317,26 @@ void GenTremoloAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    MemoryOutputStream (destData, true).writeInt (*beatParam);
+    
+    //MemoryOutputStream (destData, true).writeInt (*beatParam);
+    //MemoryOutputStream (destData, true).writeBool(randomParam->get());
+    
+    ScopedPointer<XmlElement> xml (parameters.state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void GenTremoloAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    *beatParam =  MemoryInputStream (data, static_cast<size_t> (sizeInBytes), false).readInt();
+//    *beatParam =  MemoryInputStream (data, static_cast<size_t> (sizeInBytes), false).readInt();
+    
+    ScopedPointer<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState != nullptr) {
+        if (xmlState->hasTagName (parameters.state.getType())) {
+            parameters.state = ValueTree::fromXml (*xmlState);
+        }
+    }
 }
 
 //==============================================================================

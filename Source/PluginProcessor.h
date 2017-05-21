@@ -60,6 +60,8 @@ public:
     int getSamplesPerBeat(int beatIndicator, double bpm);
     float getNewTremFrequencyFromBpmGrid();
     float getUpdatedTremFrequency(double bpm);
+//    static String boolParamToText(float value);
+//    static float textToBoolParam(const String& text);
     
     enum BeatIndicators
     {
@@ -87,6 +89,11 @@ public:
     int maxBeat;
 
 private:
+    /* Audio Parameters */
+    AudioProcessorValueTreeState parameters;
+    
+    AudioParameterBool* randomParam;
+    /* Other attributes */
     int sampleCounter;
     float min_frequency = 0.5;
     float max_frequency = 8.0;

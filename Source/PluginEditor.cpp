@@ -13,20 +13,24 @@
 
 
 //==============================================================================
-GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor& p, AudioProcessorValueTreeState& vts)
+    : AudioProcessorEditor (&p), processor (p), valueTreeState(vts)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (500, 400);
     
-    /* buttons */
-    addAndMakeVisible (&randomButton);
-    randomButton.setButtonText ("Randomize off");
-    randomButton.addListener(this);
+    /* Automation params added here */
+    randomToggleButton.setButtonText ("Random");
+    addAndMakeVisible (&randomToggleButton);
+    randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
     
-    /* combo boxes */
-//    waveformComboBox.addItemList(waveformStringList, 0)
+    /* non audioparameter buttons */
+//    addAndMakeVisible (&randomButton);
+//    randomButton.setButtonText ("Randomize off");
+//    randomButton.addListener(this);
+//    
+//    /* non audioparameter combo boxes */
     waveformComboBox.addItem("sine", 1);
     waveformComboBox.addItem("sloped-square", 2);
     waveformComboBox.addItem("triangle", 3);
@@ -35,7 +39,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     waveformComboBox.setText("sloped-square");
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
-    // TODO finish initializing the waveform combobox
 }
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
@@ -50,31 +53,23 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Gen Tremolo c", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Gen Tremolo d", getLocalBounds(), Justification::centred, 1);
 }
 
-//void GenTremoloAudioProcessorEditor::timerCallback() {
-//    const OwnedArray<AudioProcessorParameter> &params = processor.getParameters();
-//    for (int i = 0; i < params.size(); ++i)
-//    {
-//        if (const AudioParameterInt* param = dynamic_cast<AudioParameterInt*> (params[i])) {
-//            const String paramString = param->name;
-//            if (paramString.compare("Beat") == 0) {
-//                beatLabel->setText(getBeatLabelTextFromBeatParameterValue(param), dontSendNotification);
-//            }
-//        }
+//void GenTremoloAudioProcessorEditor::buttonClicked (Button* button) {
+//    if (AudioParameterBool* param = getParameterForButton (button)) {
+//        param->beginChangeGesture();
+//        *param = button->getToggleState();
+//        param->endChangeGesture();
+//    }
+//    if (button == &randomButton) {
+//        processor.isRandom = !processor.isRandom;
+//        if (processor.isRandom)
+//            randomButton.setButtonText("Randomize on");
+//        if (!processor.isRandom)
+//            randomButton.setButtonText("Randomize off");
 //    }
 //}
-
-void GenTremoloAudioProcessorEditor::buttonClicked (Button* button) {
-    if (button == &randomButton) {
-        processor.isRandom = !processor.isRandom;
-        if (processor.isRandom)
-            randomButton.setButtonText("Randomize on");
-        if (!processor.isRandom)
-            randomButton.setButtonText("Randomize off");
-    }
-}
 
 // TODO get this to work
 void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
@@ -99,11 +94,13 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
     }
 }
 
-void GenTremoloAudioProcessorEditor::resized()
-{
+void GenTremoloAudioProcessorEditor::resized() {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    randomButton.setBounds (40, 30, getWidth() - 100, getHeight()/4);
+//    randomButton.setBounds (40, 30, getWidth() - 100, getHeight()/4);
     // TODO add the waveform combo box to this.
     waveformComboBox.setBounds(getWidth()/2, 100 + getHeight()/4, getWidth()/3, getHeight()/5);
+    randomToggleButton.setBounds(40, 30, getWidth() - 100, getHeight()/4);
+    
+    /* TODO make the resizing more intelligent and automatic... something like this example below from https://www.juce.com/doc/tutorial_audio_parameter */
 }
