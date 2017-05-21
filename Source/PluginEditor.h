@@ -29,21 +29,35 @@ public:
     void resized() override;
     void comboBoxChanged(ComboBox* comboBox) override;
     
+    /* public attributes */
+    const int numMinBeatTabs = 5;
+    Colour tabColorRGBA = Colours::aqua;
 
 private:
+    /* Methods */
+    
+    
+    /* Parameter-related objects */
     AudioProcessorValueTreeState& valueTreeState;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> randomAttachment;
 
     /* Components */
     ToggleButton randomToggleButton;
+    
     Label chaosLabel;
     Slider chaosSlider;
-//    Label* beatLabel;
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    GenTremoloAudioProcessor& processor;
+    
+    Label minBeatLabel;
+    TabbedButtonBar minBeatTabButtonBar;
+    
     ComboBox waveformComboBox;
+    
+    /* Misc attributes */
+
+    /* This reference is provided as a quick way for your editor to
+     * access the processor object that created it. */
+    GenTremoloAudioProcessor& processor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GenTremoloAudioProcessorEditor)
 };

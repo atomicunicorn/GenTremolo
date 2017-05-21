@@ -14,16 +14,17 @@
 
 //==============================================================================
 GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor& p, AudioProcessorValueTreeState& vts)
-    : AudioProcessorEditor (&p), valueTreeState(vts),  processor (p)
+    : AudioProcessorEditor (&p), valueTreeState(vts),  minBeatTabButtonBar(TabbedButtonBar::Orientation::TabsAtBottom), processor (p)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (500, 400);
     
-    /* Automation params added here */
+    /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
+    
     chaosLabel.setText("Chaos Amount", dontSendNotification);
     addAndMakeVisible(&chaosLabel);
     chaosSlider.setSliderStyle (Slider::LinearBarVertical);
@@ -32,7 +33,20 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     chaosSlider.setPopupDisplayEnabled (true, this);
     addAndMakeVisible(&chaosSlider);
     chaosAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "chaosParamID", chaosSlider);
-
+    
+    
+    // TODO look into making the minBeat controlled by a slider with an "IncDecButtons" SliderStyle!!!
+    minBeatLabel.setText("Min beat", dontSendNotification);
+    addAndMakeVisible(&minBeatLabel);
+    // first tab added farthest left, last added farthest right...
+    minBeatTabButtonBar.addTab("1/64th", tabColorRGBA, 0);
+    minBeatTabButtonBar.addTab("1/32nd", tabColorRGBA, 1);
+    minBeatTabButtonBar.addTab("1/16th", tabColorRGBA, 2);
+    minBeatTabButtonBar.addTab("1/8th", tabColorRGBA, 3);
+    minBeatTabButtonBar.addTab("1/4th", tabColorRGBA, 4);
+    minBeatTabButtonBar.setName("Min beat");
+    addAndMakeVisible(&minBeatTabButtonBar);
+    
     /* non audioparameter combo boxes */
     waveformComboBox.addItem("sine", 1);
     waveformComboBox.addItem("sloped-square", 2);
@@ -56,7 +70,7 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Gen Tremolo d", getLocalBounds(), Justification::centredTop, 1);
+    g.drawFittedText ("Gen Tremolo e", getLocalBounds(), Justification::centredTop, 1);
 }
 
 // TODO get this to work
@@ -87,9 +101,15 @@ void GenTremoloAudioProcessorEditor::resized() {
      * subcomponents in your editor.. */
     
     waveformComboBox.setBounds(getWidth()/2, 100 + getHeight()/4, getWidth()/3, getHeight()/5);
-    randomToggleButton.setBounds(getWidth() - 180, 30, getWidth()/4, getHeight()/6);
+    randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
     chaosSlider.setBounds(40, 30, 20, getHeight() - 120);
     Rectangle<int> chaosSliderBounds = chaosSlider.getBounds();
-    chaosLabel.setBounds(chaosSliderBounds.getX(), chaosSliderBounds.getBottom() + 20, 100, 90);
-    /* TODO make the resizing more intelligent and automatic... something like this example below from https://www.juce.com/doc/tutorial_audio_parameter */
+    chaosLabel.setBounds(chaosSliderBounds.getRight() - chaosSliderBounds.getWidth(), chaosSliderBounds.getBottom() + 10, 85, 35);
+    Rectangle<int> chaosLabelBounds = chaosLabel.getBounds();
+    minBeatTabButtonBar.setBounds(chaosLabelBounds.getRight(), chaosLabelBounds.getBottom() + 15, getWidth()/2, 30);
+    Rectangle<int> minBarBounds = minBeatTabButtonBar.getBounds();
+    minBeatLabel.setBounds(minBarBounds.getCentreX(), minBarBounds.getBottom()-minBarBounds.getHeight() - 11, minBarBounds.getWidth()/3, 10);
+    
+    // TODO smarter or automatic resizing. Like example from Juce audio parameter tutorial
+    
 }
