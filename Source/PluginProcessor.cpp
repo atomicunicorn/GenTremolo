@@ -43,7 +43,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     /* initialize and add the parameters */
     
-    // TODO remove the text conversion lambdas here (not needed)
+    // TODO use the value to text function to set the label to either on or off for automation
     parameters.createAndAddParameter("randomParamID", "Random", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
                                      [](float value)
@@ -59,6 +59,8 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                          return 0.0f;
                                      });   // text to value function
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    // TODO use the value to text function to set the min beat label
+    parameters.createAndAddParameter("minBeatParamID", "Min beat", String(), NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.state = ValueTree (Identifier ("APVTSGenTremolo"));
 
 }

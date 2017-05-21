@@ -17,7 +17,7 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener, private Slider::Listener
 //, private Timer
 {
 public:
@@ -28,6 +28,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void comboBoxChanged(ComboBox* comboBox) override;
+    void sliderValueChanged(Slider* slider) override;
     
     /* public attributes */
     const int numMinBeatTabs = 5;

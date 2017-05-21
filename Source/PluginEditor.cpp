@@ -25,6 +25,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
     
+    
+    // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
     chaosSlider.setSliderStyle (Slider::LinearVertical);
     chaosSlider.setRange(0.0, 10.0, 1.0);
     chaosSlider.setChangeNotificationOnlyOnRelease(true);
@@ -39,7 +41,13 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     minBeatSlider.setSliderStyle(Slider::IncDecButtons);
     minBeatSlider.setRange(0, 4, 1);
     minBeatSlider.setValue(0);
+    minBeatSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
     addAndMakeVisible(&minBeatSlider);
+    minBeatSlider.addListener(this);
+    minBeatLabel.setText("Min beat: 1/4", dontSendNotification);
+    minBeatLabel.attachToComponent(&minBeatSlider, false);
+    addAndMakeVisible(&minBeatLabel);
+    minBeatAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "minBeatParamID", minBeatSlider);
     
     /* non audioparameter combo boxes */
     waveformComboBox.addItem("sine", 1);
@@ -67,7 +75,6 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText ("Gen Tremolo e", getLocalBounds(), Justification::centredTop, 1);
 }
 
-// TODO get this to work
 void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
     if (comboBox == &waveformComboBox) {
         switch (comboBox->getSelectedId()) {
@@ -90,6 +97,31 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
     }
 }
 
+void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
+    if (slider == &minBeatSlider) {
+        switch ((int)slider->getValue()) {
+            case 0:
+                minBeatLabel.setText("min beat: 1/64th", dontSendNotification);
+                break;
+            case 1:
+                minBeatLabel.setText("min beat: 1/32nd", dontSendNotification);
+                break;
+            case 2:
+                minBeatLabel.setText("min beat: 1/16th", dontSendNotification);
+                break;
+            case 3:
+                minBeatLabel.setText("min beat: 1/8th", dontSendNotification);
+                break;
+            case 4:
+                minBeatLabel.setText("min beat: 1/4th", dontSendNotification);
+                break;
+            default:
+                minBeatLabel.setText("min beat: n/a", dontSendNotification);
+                break;
+        }
+    }
+}
+
 void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
@@ -97,7 +129,8 @@ void GenTremoloAudioProcessorEditor::resized() {
     waveformComboBox.setBounds(getWidth()/2, 100 + getHeight()/4, getWidth()/3, getHeight()/5);
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
-    minBeatSlider.setBounds(chaosSlider.getX() + 10, chaosSlider.getBottom() + 50, 120, 25);
+    minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3, chaosSlider.getBottom() + 50, 140, 20);
+    minBeatSlider.setBounds(chaosSlider.getX() - getWidth()/3 + minBeatLabel.getWidth(), chaosSlider.getBottom() + 50, 125, 25);
     
     // TODO smarter or automatic resizing. Like example from Juce audio parameter tutorial
     
