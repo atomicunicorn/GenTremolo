@@ -28,22 +28,30 @@ public:
     EuclidGrid();
     ~EuclidGrid();
     
+    /* Structs */
+    struct euclidNote {
+        int lengthInSamples;
+        bool isMuted;
+    };
+    
     /* Methods */
     int getMapX();
     int getMapY();
     int getRandomness();
     int getDensity();
     int getEuclideanLength();
+    bool isOffNote();
     
     void setMapX(int x);
     void setMapY(int y);
     void setRandomness(int r);
     void setDensity(int d);
     void setEuclideanLength(int euclidLength);
+    void resetToDefault();
     
     /* Pattern generation methods */
     void reset();
-    int run(long playHeadLocationBy32Notes, int samplesPerQuarterNote);
+    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, euclidNote& noteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap();                     // originally referred to as readDrumMap
     void output();
@@ -62,6 +70,7 @@ public:
 //    uint32_t* getBeatMap();
     
 private:
+    bool isOffNoteBool;
     int mapX;
     int mapY;
     int randomness;
@@ -75,6 +84,16 @@ private:
     int amplitude;         // !!! - originally referred to as velocity
     const int stepsPerPattern = 32;
     int state;
+    
+    const int defaultMapX = 64;
+    const int defaultMapY = 64;
+    const int defaultRandomness = 10;
+    const int defaultPatternStep = 0;
+    const int defaultPerterbation = 0;
+    const int defaultDensity = 32;
+    const int defaultEuclideanLength = 7; // !!! BD=5,SN=7,HH=11;
+    const int defaultAmplitude = 0;
+    const bool defaulIsOffNoteBool = false;
     
     /* Methods */
     uint32_t u32Mix(uint32_t first, uint32_t second, uint32_t maxVal);

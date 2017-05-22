@@ -63,6 +63,9 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
 {
+    delete randomAttachment;
+    delete chaosAttachment;
+    delete minBeatAttachment;
 }
 
 //==============================================================================

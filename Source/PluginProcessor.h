@@ -58,6 +58,7 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     float lfo(float phase, int waveform);
+    int getSamplesPerQuarterNote(double bpm);
     int getSamplesPerBeat(int beatIndicator, double bpm);
     float getUpdatedTremFrequency(double bpm);
     int scaleChaosParameterToInt();
@@ -82,6 +83,13 @@ public:
     };
     AudioParameterInt* beatParam;
     bool isRandom;
+    
+    bool isEuclid;
+    int euclidX;
+    int euclidY;
+    int euclidDensity;
+    int euclidRandomness;
+    
     int trem_waveform_indicator;
     int trem_beat_indicator;
     int minBeat;
@@ -92,9 +100,13 @@ private:
     AudioProcessorValueTreeState parameters;
     AudioParameterBool* randomParam;
     
+    /* Constants */
+    const int declickRampLengthInMs = 4; // this is the default fade length in ableton to remove clicks
+    
     /* Other attributes */
     EuclidGrid euclidGrid;
     int sampleCounter;
+    long globalNumSamplesPassed;
     float min_frequency = 0.5;
     float max_frequency = 8.0;
     int blockCounter;
@@ -102,7 +114,7 @@ private:
     float next_trem_frequency;
     float trem_depth = 1.0;
     float trem_lfo_phase = 0.0;
-    float sample_frequency = 1.0/44100.0;
+    double sample_frequency = 1.0/44100.0;
     double currentSampleRate;
     float tremoloBufferPosition;
     float tremoloBufferIncriment;

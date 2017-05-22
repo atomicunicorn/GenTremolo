@@ -13,29 +13,54 @@
 
 EuclidGrid::EuclidGrid()
 {
-    mapX = 64;
-    mapY = 64;
-    randomness = 10;
-    patternStep = 0;
-    perterbation = 0;
-    density = 32;
-    euclideanLength = 7; // !!! BD=5,SN=7,HH=11;
-    amplitude = 0;
+    /* maybe map these to a different set of initializer constants? */
+    mapX = defaultMapX;
+    mapY = defaultMapY;
+    randomness = defaultRandomness;
+    patternStep = defaultPatternStep;
+    perterbation = defaultPerterbation;
+    density = defaultDensity;
+    euclideanLength = defaultEuclideanLength;
+    amplitude = defaultAmplitude;
+    isOffNoteBool = defaulIsOffNoteBool;
 }
 
 EuclidGrid::~EuclidGrid()
 {
 }
 
+void EuclidGrid::resetToDefault() {
+    mapX = defaultMapX;
+    mapY = defaultMapY;
+    randomness = defaultRandomness;
+    patternStep = defaultPatternStep;
+    perterbation = defaultPerterbation;
+    density = defaultDensity;
+    euclideanLength = defaultEuclideanLength;
+    amplitude = defaultAmplitude;
+    isOffNoteBool = defaulIsOffNoteBool;
+}
+
 void EuclidGrid::reset() {
-    
+    euclideanStep = 0;
+    patternStep = 0;
+    state = 0;
+    isOffNoteBool = false;
 }
 
 // TODO pass in the min and max beat values here to dicate return value range a bit
 /* returns the length that the input audio will be played (think of as note duration) 
  * returned value represents the number of samples the "note" lasts. */
-int EuclidGrid::run(long playHeadLocationBy32Notes, int samplesPerQuarterNote) {
-    patternStep = playHeadLocationBy32Notes % 32;
+bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, euclidNote& noteStruct) {
+    if (playHeadLocationBy32Notes < 0) {
+        resetToDefault();
+        return false;
+    }
+    isOffNoteBool = !isOffNoteBool; // TODO be careful of possible race condition here when the processor checks this value...
+    
+    noteStruct.isMuted = isOffNoteBool;
+    
+    patternStep = (int)(playHeadLocationBy32Notes % 32);
     state = 0;
     evaluatePattern();
     output();
@@ -43,8 +68,8 @@ int EuclidGrid::run(long playHeadLocationBy32Notes, int samplesPerQuarterNote) {
     
     /* increment euclidean clock */
     euclideanStep = (euclideanStep + 1) % euclideanLength;
+    
     int generatedNoteLengthInSamples = 0;
-//    return (state & 2) > 0 ?
     if ((state & 1) > 0) { /* originally this would trigger the kick drum */
         generatedNoteLengthInSamples += samplesPerPatternStep*2;
     }
@@ -54,7 +79,10 @@ int EuclidGrid::run(long playHeadLocationBy32Notes, int samplesPerQuarterNote) {
     if ((state & 4) > 0) { /* originally this would trigger the high hat */
         generatedNoteLengthInSamples += samplesPerPatternStep*4;
     }
-    return generatedNoteLengthInSamples;
+//    return generatedNoteLengthInSamples;
+    
+    noteStruct.lengthInSamples = generatedNoteLengthInSamples;
+    return true;
 }
 
 /* TODO maybe add more randomness to the instMask and accentBits? 
@@ -79,7 +107,7 @@ void EuclidGrid::evaluatePattern() {
         if (level > 192) {
             accentBits |= instMask;
         }
-        amplitude = level / 2;
+//        amplitude = level / 2;   // not actually used right now
         state |= instMask;
     }
     instMask <<= 1;
@@ -143,6 +171,10 @@ int EuclidGrid::getDensity() {
 
 int EuclidGrid::getEuclideanLength() {
     return euclideanLength;
+}
+
+bool EuclidGrid::isOffNote() {
+    return isOffNoteBool;
 }
 
 void EuclidGrid::setMapX(int x) {
