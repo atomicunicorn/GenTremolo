@@ -10,6 +10,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "EuclidGrid.h"
 
 
 //==============================================================================
@@ -26,7 +27,7 @@ GenTremoloAudioProcessor::GenTremoloAudioProcessor()
 #endif
 parameters(*this, nullptr) // TODO point to and set up an undomanager
 {
-    // Set default values:
+    /* Set default values: */
     trem_beat_indicator = k4th;
     trem_frequency = 2.0;
     trem_depth = 1.0;
@@ -37,9 +38,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     minBeat = k64th;
     maxBeat = k2;
     blockCounter = 1;
-    
     sampleCounter = 0;
-    
     
     /* initialize and add the parameters */
     

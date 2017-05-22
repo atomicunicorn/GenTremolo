@@ -11,6 +11,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "EuclidGrid.h"
 #include <math.h>
 
 
@@ -89,9 +90,10 @@ public:
 private:
     /* Audio Parameters */
     AudioProcessorValueTreeState parameters;
-    
     AudioParameterBool* randomParam;
+    
     /* Other attributes */
+    EuclidGrid euclidGrid;
     int sampleCounter;
     float min_frequency = 0.5;
     float max_frequency = 8.0;
