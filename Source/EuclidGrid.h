@@ -6,8 +6,10 @@
 //
 //
 
-#ifndef EUCLIDGRID_H
-#define EUCLIDGRID_H
+//#ifndef EUCLIDGRID_H
+//#define EUCLIDGRID_H
+
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <math.h>
@@ -29,7 +31,7 @@ public:
     ~EuclidGrid();
     
     /* Structs */
-    struct euclidNote {
+    struct EuclidNote {
         int lengthInSamples;
         bool isMuted;
     };
@@ -51,7 +53,7 @@ public:
     
     /* Pattern generation methods */
     void reset();
-    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, euclidNote& noteStruct);
+    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, EuclidNote& noteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap();                     // originally referred to as readDrumMap
     void output();
@@ -654,5 +656,3 @@ private:
     };
 
 };
-
-#endif

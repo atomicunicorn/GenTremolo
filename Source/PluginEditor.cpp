@@ -63,9 +63,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
 {
-    delete randomAttachment;
-    delete chaosAttachment;
-    delete minBeatAttachment;
 }
 
 //==============================================================================
@@ -76,7 +73,7 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Gen Tremolo e", getLocalBounds(), Justification::centredTop, 1);
+    g.drawFittedText ("Gen Tremolo f", getLocalBounds(), Justification::centredTop, 1);
 }
 
 void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {

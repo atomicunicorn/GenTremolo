@@ -104,7 +104,14 @@ private:
     const int declickRampLengthInMs = 4; // this is the default fade length in ableton to remove clicks
     
     /* Other attributes */
-    EuclidGrid euclidGrid;
+//    EuclidGrid* euclidGrid;
+    ScopedPointer<EuclidGrid> euclidGrid;
+    float euclidNoteAmplitude;
+    long pptPosition;
+    long lastPptPosition;
+    LinearSmoothedValue<float> euclidLinearSmoothedValue;
+    float volumeRampMultiplier;
+    
     int sampleCounter;
     long globalNumSamplesPassed;
     float min_frequency = 0.5;

@@ -51,7 +51,7 @@ void EuclidGrid::reset() {
 // TODO pass in the min and max beat values here to dicate return value range a bit
 /* returns the length that the input audio will be played (think of as note duration) 
  * returned value represents the number of samples the "note" lasts. */
-bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, euclidNote& noteStruct) {
+bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, EuclidNote& noteStruct) {
     if (playHeadLocationBy32Notes < 0) {
         resetToDefault();
         return false;
@@ -79,7 +79,6 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     if ((state & 4) > 0) { /* originally this would trigger the high hat */
         generatedNoteLengthInSamples += samplesPerPatternStep*4;
     }
-//    return generatedNoteLengthInSamples;
     
     noteStruct.lengthInSamples = generatedNoteLengthInSamples;
     return true;
