@@ -33,8 +33,8 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     trem_depth = 1.0;
     trem_waveform_indicator = kWaveformSquareSlopedEdges; //kWaveformSine;
     trem_lfo_phase = 0.0;
-    sample_frequency = 1.0/44100.0;
     isRandom = false;
+    isStandard = true;
     minBeat = k64th;
     maxBeat = k2;
     blockCounter = 1;
@@ -43,23 +43,16 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     globalNumSamplesPassed = 0;
     
     
-    /* initialize and add the parameters */
+    /* Initialize and add the parameters */
     
     // TODO use the value to text function to set the label to either on or off for automation
     parameters.createAndAddParameter("randomParamID", "Random", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                     [](float value)
-                                     {
-                                         // value to text function
-                                         return value < 0.5 ? "Random Off" : "Random On";
-                                     },
-                                     [](const String& text)
-                                     {
-                                         // text to value function
-                                         if (text == "Random Off")    return 0.0f;
-                                         if (text == "Random On")  return 1.0f;
-                                         return 0.0f;
-                                     });   // text to value function
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
+    parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
+    parameters.createAndAddParameter("standardParamID", "Standard", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
+    
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
     // TODO use the value to text function to set the min beat label
     parameters.createAndAddParameter("minBeatParamID", "Min beat", String(), NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f, nullptr, nullptr);
@@ -69,14 +62,15 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     
     /* EuclidGrid setup */  // TODO integrate user parameters here!
-//    EuclidGrid* euclidGrid = new EuclidGrid();
     euclidGrid = new EuclidGrid();
     isEuclid = false;
+    isPlayingEuclidNote = false;
+    samplesLeftInCurrentEuclidNote = 0;
+    euclidBeatDivisor = 32; // default to 32nd note length
     euclidNoteAmplitude = 0.0f;
-    volumeRampMultiplier = euclidNoteAmplitude;
-    euclidLinearSmoothedValue.reset((double)sample_frequency, ((double)declickRampLengthInMs)/1000.0);
-    lastPptPosition = -1;
-    pptPosition = 0; // position relative to 32nd notes
+    euclidLinearSmoothedValue.reset(defaultSampleRate, ((double)volumeRampLengthInMs)/1000.0);
+    euclidStepsPassed = 0;
+//    pptPosition = 0; // global playhead position relative to 32nd notes
 }
 
 GenTremoloAudioProcessor::~GenTremoloAudioProcessor()
@@ -142,6 +136,8 @@ void GenTremoloAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    
+    // TODO move lots of initialization here
 }
 
 void GenTremoloAudioProcessor::releaseResources()
@@ -207,32 +203,27 @@ float GenTremoloAudioProcessor::lfo(float phase, int waveform)
     }
 }
 
-int GenTremoloAudioProcessor::getSamplesPerQuarterNote(double bpm) {
-    double sampleRate = GenTremoloAudioProcessor::getSampleRate();
+int GenTremoloAudioProcessor::getSamplesPerQuarterNote(double bpm, const double sampleRate) {
     if (bpm <= 0) {
         return (int)round(60.0*sampleRate/120.0);
     }
     return (int)round(60.0*sampleRate/bpm);
 }
 
-int GenTremoloAudioProcessor::getSamplesPerBeat(int beatIndicator, double bpm) {
-    double sampleRate = GenTremoloAudioProcessor::getSampleRate();
-    if (bpm <= 0)
-        return (int)round(60.0*sampleRate/120.0);
-    int quarterNoteSampleLength = (int)round(60.0*sampleRate/bpm);
+int GenTremoloAudioProcessor::getSamplesPerBeat(int beatIndicator, int samplesPerQuarterNote) {
     switch (beatIndicator) {
         case k4th:
-            return quarterNoteSampleLength;
+            return samplesPerQuarterNote;
         case k8th:
-            return quarterNoteSampleLength/2;
+            return samplesPerQuarterNote/2;
         case k16th:
-            return quarterNoteSampleLength/4;
+            return samplesPerQuarterNote/4;
         case k32nd:
-            return quarterNoteSampleLength/8;
+            return samplesPerQuarterNote/8;
         case k64th:
-            return quarterNoteSampleLength/16;
+            return samplesPerQuarterNote/16;
         default:
-            return quarterNoteSampleLength;
+            return samplesPerQuarterNote;
     }
 }
 
@@ -248,14 +239,26 @@ int GenTremoloAudioProcessor::scaleChaosParameterToInt() {
     return 10 - chaosLevel;
 }
 
+int GenTremoloAudioProcessor::getEuclidNoteSampleLength(int samplesPerQuarterNote) {
+    if (euclidBeatDivisor <=0)
+        return samplesPerQuarterNote;
+    float multipleOfQuarterNote = 4.0f/((float)euclidBeatDivisor);
+    return ((int)multipleOfQuarterNote)*samplesPerQuarterNote;
+}
+
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    
+    isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
+    isStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
+    isEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
     int randVal = 1;  // TODO make randVal remember its state
     const int chaosIntervalSize = scaleChaosParameterToInt();
-    isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
-//    sample_frequency = GenTremoloAudioProcessor::getSampleRate(); // this is not working. Get sample freq from host
-//    euclidLinearSmoothedValue.reset(sample_frequency, ((float)declickRampLengthInMs)/1000.0);
+    const double sampleRate = GenTremoloAudioProcessor::getSampleRate();
+    const double sampleFrequency = 1.0 / sampleRate;
+    const int volumeRampSampleLength = (const int)(sampleRate*0.001*volumeRampLengthInMs);
+    int euclidNoteSampleLength = (int)(60.0*defaultSampleRate/120.0); // default to length of 1/4 note at 120 bpm
+    euclidLinearSmoothedValue.reset(sampleFrequency, ((double)volumeRampLengthInMs)/1000.0);
+    bool onEuclidStep = false;
     const int totalNumInputChannels  = GenTremoloAudioProcessor::getTotalNumInputChannels();
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     const int numSamples = buffer.getNumSamples();
@@ -269,13 +272,16 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result)) {
             bpm = result.bpm;
             globalNumSamplesPassed = (long)result.timeInSamples;
-            pptPosition = 8*(long)round(result.ppqPosition);
-            lastPptPosition = pptPosition;
         }
     }
-    int samplesPerBeatIndicator = getSamplesPerBeat(trem_beat_indicator, bpm);
-    int samplesPerQuarterNote = getSamplesPerQuarterNote(bpm);
+    int samplesPerQuarterNote = getSamplesPerQuarterNote(bpm, sampleRate);
     long samplesPer32ndNote = 8*(long)samplesPerQuarterNote;
+    euclidStepsPassed = (int)floor( ((double)globalNumSamplesPassed)/((double)samplesPer32ndNote) );
+    
+    if (isEuclid)
+        euclidNoteSampleLength = getEuclidNoteSampleLength(samplesPerQuarterNote);
+    
+    int samplesPerBeatIndicator = getSamplesPerBeat(trem_beat_indicator, samplesPerQuarterNote);
     float temp_trem_lfo_phase_copy;
     float* channelDataLeft = buffer.getWritePointer(0);
     float* channelDataRight = buffer.getWritePointer(1);
@@ -288,7 +294,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         const float inRight = channelDataRight[i];
         
         /* Random Tremolo Preparation */
-        if (!isEuclid && isRandom && (sampleCounter % samplesPerBeatIndicator*chaosIntervalSize) == 0) {
+        if (isRandom && (sampleCounter % samplesPerBeatIndicator*chaosIntervalSize) == 0) {
             trem_frequency = next_trem_frequency;
             randVal = rand() + 1;
             trem_beat_indicator = BeatIndicators(randVal % 5);
@@ -296,17 +302,42 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
             sampleCounter = 0;
         }
         
-        /* Euclidean Tremolo preparation - update pptPosition and lastPptPosition */
-        if ((globalNumSamplesPassed%samplesPer32ndNote == 0)) {
-            lastPptPosition = pptPosition;
-            pptPosition++;
-        }
-        
-        /* Euclidean Tremolo */
-        if (isEuclid) { // TODO make sure that we are not doing multiple grid runs while one grid note plays
-            if ( (pptPosition != lastPptPosition) && euclidGrid->runGrid(pptPosition, samplesPerQuarterNote, noteStruct) ) {
-                euclidNoteAmplitude = noteStruct.isMuted ? 0.0f : 1.0f;
-                euclidLinearSmoothedValue.setValue(euclidNoteAmplitude);
+        /*** Euclidean Tremolo Logic***/
+        if (isEuclid) {
+            
+            /* Euclidean Tremolo preparation - update onEuclidStep and call runGrid if on a euclid step */
+            if ((globalNumSamplesPassed%samplesPer32ndNote) == 0) {
+                onEuclidStep = true;
+                euclidStepsPassed += 1;
+            } else {
+                onEuclidStep = false;
+            }
+            if (onEuclidStep
+                && euclidGrid->runGrid((long)euclidStepsPassed, samplesPerQuarterNote, euclidNoteSampleLength, noteStruct) ) {
+                
+                if (!isPlayingEuclidNote) {       /* no euclid note is currently playing */
+                    if (noteStruct.noteOn) {
+                        euclidNoteAmplitude = 1.0f;
+                        euclidLinearSmoothedValue.setValue(1.0f);
+                        isPlayingEuclidNote = true;
+                        samplesLeftInCurrentEuclidNote = noteStruct.lengthInSamples; // euclidNoteSampleLength;
+                    } else {
+                        euclidNoteAmplitude = 0.0f;
+                    }
+                }
+                else {                          /* a euclidGrid note is already playing */
+                    if (samplesLeftInCurrentEuclidNote > 0)
+                        samplesLeftInCurrentEuclidNote -= 1;
+                    if (samplesLeftInCurrentEuclidNote == 0) {
+                        euclidNoteAmplitude = 0.0f;
+                        isPlayingEuclidNote = false;
+                    }
+                    if (samplesLeftInCurrentEuclidNote == volumeRampSampleLength) {
+                        euclidLinearSmoothedValue.setValue(0.0f);
+                    } else {
+                        euclidNoteAmplitude = 1.0f;
+                    }
+                }
             }
             if (euclidLinearSmoothedValue.isSmoothing()) {
                 volumeRampMultiplier = euclidLinearSmoothedValue.getNextValue();
@@ -316,20 +347,21 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 channelDataLeft[i] = inLeft*euclidNoteAmplitude;
                 channelDataRight[i] = inRight*euclidNoteAmplitude;
             }
+            
         }
         
-        /* Non Euclidean Tremolo */
+        /*** Non Euclidean Tremolo ***/
         if (!isEuclid) { // non euclidean logic
             channelDataLeft[i] = inLeft * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
             channelDataRight[i] = inRight * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
         }
         
         /* Update the carrier and LFO phases, keeping them in the range 0-1 */
-        temp_trem_lfo_phase_copy += trem_frequency*sample_frequency;
+        temp_trem_lfo_phase_copy += trem_frequency*sampleFrequency;
         if(temp_trem_lfo_phase_copy >= 1.0)
             temp_trem_lfo_phase_copy -= 1.0;
         
-        /* Increment sample counters */
+        /* Increment sample counters and handle other sample bookkeeping*/
         sampleCounter++;
         globalNumSamplesPassed++;
     }

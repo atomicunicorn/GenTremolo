@@ -58,8 +58,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     float lfo(float phase, int waveform);
-    int getSamplesPerQuarterNote(double bpm);
-    int getSamplesPerBeat(int beatIndicator, double bpm);
+    int getSamplesPerQuarterNote(double bpm, const double sampleRate);
+    int getSamplesPerBeat(int beatIndicator, int samplesPerQuarterNote);
+    int getEuclidNoteSampleLength(int samplesPerQuarterNote);
     float getUpdatedTremFrequency(double bpm);
     int scaleChaosParameterToInt();
     
@@ -81,10 +82,12 @@ public:
         kWaveformSquareSlopedEdges = 4,
         kNumWaveforms
     };
+    
     AudioParameterInt* beatParam;
     bool isRandom;
-    
     bool isEuclid;
+    bool isStandard;
+    
     int euclidX;
     int euclidY;
     int euclidDensity;
@@ -101,16 +104,22 @@ private:
     AudioParameterBool* randomParam;
     
     /* Constants */
-    const int declickRampLengthInMs = 4; // this is the default fade length in ableton to remove clicks
+    const double volumeRampLengthInMs = 4.0; // this is the default fade length in ableton to remove clicks
+    const double defaultSampleRate = 44100.0;
+    const double defaultSampleFrequency = 1.0 / defaultSampleRate;
+    const int euclidStepNoteDivisor = 32; // every 32nd note
     
     /* Other attributes */
-//    EuclidGrid* euclidGrid;
     ScopedPointer<EuclidGrid> euclidGrid;
-    float euclidNoteAmplitude;
-    long pptPosition;
-    long lastPptPosition;
-    LinearSmoothedValue<float> euclidLinearSmoothedValue;
     float volumeRampMultiplier;
+    float euclidNoteAmplitude;
+    int euclidBeatDivisor;
+    bool isPlayingEuclidNote;
+    int samplesLeftInCurrentEuclidNote;
+    // TODO allow this to be perterbed to different lengths
+    
+    int euclidStepsPassed;
+    LinearSmoothedValue<float> euclidLinearSmoothedValue;
     
     int sampleCounter;
     long globalNumSamplesPassed;
@@ -121,7 +130,6 @@ private:
     float next_trem_frequency;
     float trem_depth = 1.0;
     float trem_lfo_phase = 0.0;
-    double sample_frequency = 1.0/44100.0;
     double currentSampleRate;
     float tremoloBufferPosition;
     float tremoloBufferIncriment;

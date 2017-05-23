@@ -23,8 +23,20 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
+    randomToggleButton.setRadioGroupId(modeRadioGroupID);
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
+    
+    euclidToggleButton.setButtonText("Euclidean");
+    euclidToggleButton.setRadioGroupId(modeRadioGroupID);
+    addAndMakeVisible(&euclidToggleButton);
+    euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidToggleButton);
+    
+    standardToggleButton.setButtonText("Standard");
+    standardToggleButton.setRadioGroupId(modeRadioGroupID);
+    standardToggleButton.setToggleState(true, dontSendNotification);
+    addAndMakeVisible(&standardToggleButton);
+    standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
     
     
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
@@ -127,8 +139,12 @@ void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
     
-    waveformComboBox.setBounds(getWidth()/2, 100 + getHeight()/4, getWidth()/3, getHeight()/5);
+    waveformComboBox.setBounds(getWidth()/2, 170 + getHeight()/4, getWidth()/3, getHeight()/5);
+    
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
+    euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 10, randomToggleButton.getWidth(), randomToggleButton.getHeight());
+    standardToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + euclidToggleButton.getHeight() + 10, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
+    
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
     minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3, chaosSlider.getBottom() + 50, 140, 20);
     minBeatSlider.setBounds(chaosSlider.getX() - getWidth()/3 + minBeatLabel.getWidth(), chaosSlider.getBottom() + 50, 125, 25);

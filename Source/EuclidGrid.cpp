@@ -51,14 +51,14 @@ void EuclidGrid::reset() {
 // TODO pass in the min and max beat values here to dicate return value range a bit
 /* returns the length that the input audio will be played (think of as note duration) 
  * returned value represents the number of samples the "note" lasts. */
-bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, EuclidNote& noteStruct) {
+bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength, EuclidNote& noteStruct) {
     if (playHeadLocationBy32Notes < 0) {
         resetToDefault();
         return false;
     }
-    isOffNoteBool = !isOffNoteBool; // TODO be careful of possible race condition here when the processor checks this value...
+//    isOffNoteBool = !isOffNoteBool; // TODO be careful of possible race condition here when the processor checks this value...
     
-    noteStruct.isMuted = isOffNoteBool;
+//    noteStruct.isMuted = isOffNoteBool;
     
     patternStep = (int)(playHeadLocationBy32Notes % 32);
     state = 0;
@@ -68,19 +68,21 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     
     /* increment euclidean clock */
     euclideanStep = (euclideanStep + 1) % euclideanLength;
+    noteStruct.noteOn = false;
     
     int generatedNoteLengthInSamples = 0;
     if ((state & 1) > 0) { /* originally this would trigger the kick drum */
-        generatedNoteLengthInSamples += samplesPerPatternStep*2;
+//        generatedNoteLengthInSamples += samplesPerPatternStep*2;
     }
     if ((state & 2) > 0) { /* originally this would trigger the snare drum */
-        generatedNoteLengthInSamples += samplesPerPatternStep*2;
+//        generatedNoteLengthInSamples += samplesPerPatternStep*2;
+        noteStruct.noteOn = true;
     }
     if ((state & 4) > 0) { /* originally this would trigger the high hat */
-        generatedNoteLengthInSamples += samplesPerPatternStep*4;
+//        generatedNoteLengthInSamples += samplesPerPatternStep*4;
     }
     
-    noteStruct.lengthInSamples = generatedNoteLengthInSamples;
+    noteStruct.lengthInSamples = noteSampleLength;
     return true;
 }
 

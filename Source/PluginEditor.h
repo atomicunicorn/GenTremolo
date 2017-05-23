@@ -41,12 +41,18 @@ private:
     
     /* Parameter-related objects */
     AudioProcessorValueTreeState& valueTreeState;
-    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
+    const int modeRadioGroupID = 1;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> randomAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> euclidAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> standardAttachment;
+    
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
 
     /* Components */
-    ToggleButton randomToggleButton;
+    ToggleButton randomToggleButton;  // TODO enable radio toggle buttons (see button.h) between normal, random, and euclid modes
+    ToggleButton euclidToggleButton;
+    ToggleButton standardToggleButton;
     
     Label chaosLabel;
     Slider chaosSlider;

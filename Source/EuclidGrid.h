@@ -33,7 +33,14 @@ public:
     /* Structs */
     struct EuclidNote {
         int lengthInSamples;
-        bool isMuted;
+        bool noteOn;
+    };
+    
+    struct StereoEuclidNote {
+        int leftLengthInSamples;
+        int rightLengthInSamples;
+        bool leftNoteOn;
+        bool rightNoteOn;
     };
     
     /* Methods */
@@ -53,7 +60,7 @@ public:
     
     /* Pattern generation methods */
     void reset();
-    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, EuclidNote& noteStruct);
+    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength, EuclidNote& noteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap();                     // originally referred to as readDrumMap
     void output();
@@ -85,7 +92,7 @@ private:
     int perterbation;     // !!!
     int amplitude;         // !!! - originally referred to as velocity
     const int stepsPerPattern = 32;
-    int state;
+    unsigned int state;
     
     const int defaultMapX = 64;
     const int defaultMapY = 64;
