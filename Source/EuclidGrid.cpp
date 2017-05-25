@@ -70,7 +70,7 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     euclideanStep = (euclideanStep + 1) % euclideanLength;
     noteStruct.noteOn = false;
     
-    int generatedNoteLengthInSamples = 0;
+//    int generatedNoteLengthInSamples = 0;
     if ((state & 1) > 0) { /* originally this would trigger the kick drum */
 //        generatedNoteLengthInSamples += samplesPerPatternStep*2;
     }

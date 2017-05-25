@@ -97,6 +97,7 @@ public:
     int trem_beat_indicator;
     int minBeat;
     int maxBeat;
+    bool isPlayingEuclidNote;
 
 private:
     /* Audio Parameters */
@@ -114,11 +115,10 @@ private:
     float volumeRampMultiplier;
     float euclidNoteAmplitude;
     int euclidBeatDivisor;
-    bool isPlayingEuclidNote;
+    
     int samplesLeftInCurrentEuclidNote;
     // TODO allow this to be perterbed to different lengths
     
-    int euclidStepsPassed;
     LinearSmoothedValue<float> euclidLinearSmoothedValue;
     
     int sampleCounter;
