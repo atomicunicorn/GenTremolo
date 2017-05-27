@@ -13,6 +13,7 @@
 
 EuclidGrid::EuclidGrid()
 {
+
     /* maybe map these to a different set of initializer constants? */
     mapX = defaultMapX;
     mapY = defaultMapY;
@@ -56,19 +57,15 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
         resetToDefault();
         return false;
     }
-//    isOffNoteBool = !isOffNoteBool; // TODO be careful of possible race condition here when the processor checks this value...
-    
-//    noteStruct.isMuted = isOffNoteBool;
-    
     patternStep = (int)(playHeadLocationBy32Notes % 32);
     state = 0;
     evaluatePattern();
     output();
-    const int samplesPerPatternStep = samplesPerQuarterNote/stepsPerPattern;
     
     /* increment euclidean clock */
     euclideanStep = (euclideanStep + 1) % euclideanLength;
-    noteStruct.noteOn = false;
+
+    noteStruct.noteOn = true;
     
 //    int generatedNoteLengthInSamples = 0;
     if ((state & 1) > 0) { /* originally this would trigger the kick drum */

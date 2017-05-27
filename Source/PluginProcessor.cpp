@@ -242,7 +242,7 @@ int GenTremoloAudioProcessor::getEuclidNoteSampleLength(int samplesPerQuarterNot
     if (euclidBeatDivisor <=0)
         return samplesPerQuarterNote;
     float multipleOfQuarterNote = 4.0f/((float)euclidBeatDivisor);
-    return ((int)multipleOfQuarterNote)*samplesPerQuarterNote;
+    return (int)round(multipleOfQuarterNote*(float)samplesPerQuarterNote);
 }
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
@@ -254,6 +254,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const bool localisRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
     const bool localisStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
     const bool localisEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
+    isEuclid = localisEuclid;
     
     /* Get sample and channel information */
     const double sampleRate = getSampleRate(); //GenTremoloAudioProcessor::getSampleRate();
@@ -305,7 +306,6 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
             /* Get euclid information if in euclidean mode */
             if (localisEuclid) {
                 euclidNoteSampleLength = getEuclidNoteSampleLength(samplesPerQuarterNote);
-                euclidStepsPassed = (int)floor( ((double)temp_global_samples_passed)/((double)samplesPer32ndNote) );
             }
             /* Get random information if in random mode */
             if (localisRandom) {
@@ -331,8 +331,12 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 if (localisEuclid) {
                     
                     /* Euclidean Tremolo preparation - update onEuclidStep and call runGrid if on a euclid step */
-                    onEuclidStep = (temp_global_samples_passed%samplesPer32ndNote == 0) ? true : false;  //TODO swich to checking if on new ppq*8 value.
-                    euclidStepsPassed += onEuclidStep ? 1 : 0;
+                    if (temp_global_samples_passed % samplesPer32ndNote == 0) {
+                        euclidStepsPassed++;
+                        onEuclidStep = true;
+                    } else {
+                        onEuclidStep = false;
+                    }
                     
                     if (onEuclidStep
                         && euclidGrid->runGrid((long)euclidStepsPassed, samplesPerQuarterNote, euclidNoteSampleLength, noteStruct) ) {
@@ -346,8 +350,10 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     temp_euclid_gain = temp_is_playing_euclid_note ? 1.0f : 0.0f;  // TODO add volume ramp to this
                     channelDataLeft[i] = inLeft*temp_euclid_gain;
                     channelDataRight[i] = inRight*temp_euclid_gain;
+                    
                     if (temp_is_playing_euclid_note && temp_samples_left_in_current_euclid_note > 0)
                         temp_samples_left_in_current_euclid_note -= 1;
+                    
                     temp_is_playing_euclid_note = (temp_samples_left_in_current_euclid_note == 0) ? false : true;
                 }
                 

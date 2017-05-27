@@ -21,7 +21,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     // editor's size to whatever you need it to be.
     setSize (500, 400);
     
-    euclidIsPlayingLabel.setText("not playing", dontSendNotification);
+    euclidIsPlayingLabel.setText("n playing", dontSendNotification);
     addAndMakeVisible(&euclidIsPlayingLabel);
     
     
@@ -146,6 +146,11 @@ void GenTremoloAudioProcessorEditor::hiResTimerCallback() {
     if (processor.isEuclid && processor.isPlayingEuclidNote) {
         String bString = processor.isPlayingEuclidNote ? "playing" : "not playing";
         euclidIsPlayingLabel.setText(bString, dontSendNotification);
+    } else {
+        if (processor.isEuclid) {
+            String bString = processor.isPlayingEuclidNote ? "note on" : "note off";
+            euclidIsPlayingLabel.setText(bString, dontSendNotification);
+        }
     }
 }
 
@@ -157,8 +162,8 @@ void GenTremoloAudioProcessorEditor::resized() {
     euclidIsPlayingLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 3, waveformComboBox.getWidth(), waveformComboBox.getHeight());
     
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
-    euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 10, randomToggleButton.getWidth(), randomToggleButton.getHeight());
-    standardToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + euclidToggleButton.getHeight() + 10, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
+    euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 5, randomToggleButton.getWidth(), randomToggleButton.getHeight());
+    standardToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + euclidToggleButton.getHeight() + 5, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
     minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3, chaosSlider.getBottom() + 50, 140, 20);

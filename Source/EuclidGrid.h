@@ -108,8 +108,6 @@ private:
     uint32_t u32Mix(uint32_t first, uint32_t second, uint32_t maxVal);
     // u32Mix adopted from U8Mix of hardware code ( mutable-instruments.net/forum/discussion/3863/understanding-code-grids-u8mix-and-bitshift-in-pattern_generator-cc/p1 )
     
-    
-    
     /* pattern arrays */
     uint32_t node_0[96]  = {
         255,      0,      0,      0,      0,      0,    145,      0,
