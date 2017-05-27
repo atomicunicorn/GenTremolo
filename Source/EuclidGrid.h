@@ -47,23 +47,25 @@ public:
     int getMapX();
     int getMapY();
     int getRandomness();
-    int getDensity();
-    int getEuclideanLength();
+    int getDensity(int index);
+    int getEuclideanLength(int index);
     bool isOffNote();
     
     void setMapX(int x);
     void setMapY(int y);
     void setRandomness(int r);
-    void setDensity(int d);
-    void setEuclideanLength(int euclidLength);
+    void setDensity(int d, int index);
+    void setEuclideanLength(int euclidLength, int index);
     void resetToDefault();
     
     /* Pattern generation methods */
     void reset();
     bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength, EuclidNote& noteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
-    int readPatternMap();                     // originally referred to as readDrumMap
+    int readPatternMap(int index);                     // originally referred to as readDrumMap
     void output();
+    
+    const int numParts = 3;
     
     /* ORIGINAL INTERNAL LOGIC FUNCTIONS
      
@@ -83,14 +85,14 @@ private:
     int mapX;
     int mapY;
     int randomness;
-    int density;          // !!!
-    int euclideanLength;  // !!!
+    int density[3];          // !!!
+    int euclideanLength[3];  // !!!
     
     /* Double check, but there most likely should not be any external access to these int params. */
     int patternStep;      // originally referred to as step
-    int euclideanStep;    // !!!
-    int perterbation;     // !!!
-    int amplitude;         // !!! - originally referred to as velocity
+    int euclideanStep[3];    // !!!
+    int perterbation[3];     // !!!
+    int amplitude[3];         // !!! - originally referred to as velocity
     const int stepsPerPattern = 32;
     unsigned int state;
     
@@ -108,8 +110,8 @@ private:
     uint32_t u32Mix(uint32_t first, uint32_t second, uint32_t maxVal);
     // u32Mix adopted from U8Mix of hardware code ( mutable-instruments.net/forum/discussion/3863/understanding-code-grids-u8mix-and-bitshift-in-pattern_generator-cc/p1 )
     
-    /* pattern arrays */
-    uint32_t node_0[96]  = {
+    /* pattern arrays */  /// XXXXXXXXX NEED TO INITIALIZE IN THE CONSTRUCTOR   https://stackoverflow.com/questions/2117313/initializing-constant-static-array-in-header-file
+    static const uint32_t node_0[96]  = {
         255,      0,      0,      0,      0,      0,    145,      0,
         0,      0,      0,      0,    218,      0,      0,      0,
         72,      0,     36,      0,    182,      0,      0,      0,

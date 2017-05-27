@@ -18,11 +18,29 @@ EuclidGrid::EuclidGrid()
     mapX = defaultMapX;
     mapY = defaultMapY;
     randomness = defaultRandomness;
-    patternStep = defaultPatternStep;
-    perterbation = defaultPerterbation;
-    density = defaultDensity;
-    euclideanLength = defaultEuclideanLength;
-    amplitude = defaultAmplitude;
+    
+    patternStep = 0;
+    
+    euclideanStep[0] = 0;
+    euclideanStep[1] = 0;
+    euclideanStep[2] = 0;
+    
+    perterbation[0] = defaultPerterbation;
+    perterbation[1] = defaultPerterbation;
+    perterbation[2] = defaultPerterbation;
+    
+    density[0] = defaultDensity;
+    density[1] = defaultDensity;
+    density[2] = defaultDensity;
+    
+    euclideanLength[0] = 5;
+    euclideanLength[1] = 7;
+    euclideanLength[2] = 11;
+    
+    amplitude[0] = defaultAmplitude;
+    amplitude[1] = defaultAmplitude;
+    amplitude[2] = defaultAmplitude;
+    
     isOffNoteBool = defaulIsOffNoteBool;
 }
 
@@ -35,15 +53,31 @@ void EuclidGrid::resetToDefault() {
     mapY = defaultMapY;
     randomness = defaultRandomness;
     patternStep = defaultPatternStep;
-    perterbation = defaultPerterbation;
-    density = defaultDensity;
-    euclideanLength = defaultEuclideanLength;
-    amplitude = defaultAmplitude;
+    
+    perterbation[0] = defaultPerterbation;
+    perterbation[1] = defaultPerterbation;
+    perterbation[2] = defaultPerterbation;
+    
+    density[0] = defaultDensity;
+    density[1] = defaultDensity;
+    density[2] = defaultDensity;
+    
+    euclideanLength[0] = 5;
+    euclideanLength[1] = 7;
+    euclideanLength[2] = 11;
+    
+    amplitude[0] = defaultAmplitude;
+    amplitude[1] = defaultAmplitude;
+    amplitude[2] = defaultAmplitude;
+    
     isOffNoteBool = defaulIsOffNoteBool;
 }
 
 void EuclidGrid::reset() {
-    euclideanStep = 0;
+    euclideanStep[0] = 0;
+    euclideanStep[1] = 0;
+    euclideanStep[2] = 0;
+    
     patternStep = 0;
     state = 0;
     isOffNoteBool = false;
@@ -57,15 +91,18 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
         resetToDefault();
         return false;
     }
-    patternStep = (int)(playHeadLocationBy32Notes % 32);
+    patternStep = playHeadLocationBy32Notes % 32;
     state = 0;
+    
     evaluatePattern();
     output();
-    int noteLength = noteSampleLength;
     
     /* increment euclidean clock */
-    euclideanStep = (euclideanStep + 1) % euclideanLength;
-
+    for (int i = 0; i < numParts; i++) {
+        euclideanStep[i] = (euclideanStep[i] + 1) % euclideanStep[i];
+    }
+    
+    int noteLength = noteSampleLength;
     noteStruct.noteOn = true;
     
 //    int generatedNoteLengthInSamples = 0;
@@ -90,42 +127,50 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
  * Also is instMask even needed? */
 void EuclidGrid::evaluatePattern() {
     if (patternStep == 0) {
-        randomness = randomness >> 2;
-        unsigned int randSeed = (unsigned int)rand();
-        unsigned int randTwo = randSeed%256;
-        perterbation = (randTwo*randomness) >> 8;
+        for (int i = 0; i < numParts; i++) {
+            randomness = randomness >> 2;
+            unsigned int randSeed = (unsigned int)rand();
+            unsigned int randTwo = randSeed%256;
+            perterbation[i] = (randTwo*randomness) >> 8;
+        }
     }
     unsigned int instMask = 1;
     unsigned int accentBits = 0;
-    unsigned int level = readPatternMap();
-    if (level < (255 - perterbation)) {
-        level += perterbation;
-    } else {
-        level = 255;
-    }
-    unsigned int threshold = 255 - (density*2);
-    if (level > threshold) {
-        if (level > 192) {
-            accentBits |= instMask;
+    
+    for (int i = 0; i < numParts; i++) {
+        unsigned int level = readPatternMap(i);
+        if (level < (255 - perterbation[i])) {
+            level += perterbation[i];
+        } else {
+            level = 255;
         }
-//        amplitude = level / 2;   // not actually used right now
-        state |= instMask;
+        unsigned int threshold = 255 - (density[i]*2);
+        if (level > threshold) {
+            if (level > 192) {
+                accentBits |= instMask;
+            }
+//          amplitude[i] = level / 2;   // not actually used right now
+            state |= instMask;
+        }
+        instMask <<= 1;
     }
-    instMask <<= 1;
+    
     state |= accentBits << 3;
 }
 
 // TODO maybe switch all these values over to uint8_t
-int EuclidGrid::readPatternMap() { // originally referred to as readDrumMap
-    unsigned int i = (unsigned int)floor(mapX*3.0 / 127);
-    unsigned int j = (unsigned int)floor(mapY*3.0 / 127);
+int EuclidGrid::readPatternMap(int index) { // originally referred to as readDrumMap
+    int i = (int)floor(mapX*3.0 / 127);
+    int j = (int)floor(mapY*3.0 / 127);
+    
+    //XXX the null pointer issue is probably here
     
     uint32_t* mapA = beat_map[i][j];
     uint32_t* mapB = beat_map[i + 1][j];
     uint32_t* mapC = beat_map[i][j + 1];
     uint32_t* mapD = beat_map[i + 1][j + 1];
     
-    int offset = stepsPerPattern + patternStep;
+    int offset = (index * stepsPerPattern) + patternStep;
     uint32_t a = mapA[offset];
     uint32_t b = mapB[offset];
     uint32_t c = mapC[offset];
@@ -166,12 +211,16 @@ int EuclidGrid::getRandomness() {
     return randomness;
 }
 
-int EuclidGrid::getDensity() {
-    return density;
+int EuclidGrid::getDensity(int index) {
+    if (index < 0 || index > numParts)
+        return -1;
+    return density[index];
 }
 
-int EuclidGrid::getEuclideanLength() {
-    return euclideanLength;
+int EuclidGrid::getEuclideanLength(int index) {
+    if (index < 0 || index > numParts)
+        return -1;
+    return euclideanLength[index];
 }
 
 bool EuclidGrid::isOffNote() {
@@ -193,14 +242,18 @@ void EuclidGrid::setRandomness(int r) {
         randomness = r;
 }
 
-void EuclidGrid::setDensity(int d) {
+void EuclidGrid::setDensity(int d, int index) {
+    if (index < 0 || index > numParts)
+        return;
     if (d >= 0 && d <= 127)
-        density = d;
+        density[index] = d;
 }
 
-void EuclidGrid::setEuclideanLength(int euclidLength) {
+void EuclidGrid::setEuclideanLength(int euclidLength, int index) {
+    if (index < 0 || index > numParts)
+        return;
     if (euclidLength > 0 && euclidLength <= 32)
-        euclideanLength = euclidLength;
+        euclideanLength[index] = euclidLength;
 }
 
 uint32_t* EuclidGrid::getNodeByIndex(int index) {
