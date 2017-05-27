@@ -98,6 +98,7 @@ public:
     int minBeat;
     int maxBeat;
     bool isPlayingEuclidNote;
+    int euclidStep;
 
 private:
     /* Audio Parameters */
@@ -115,6 +116,7 @@ private:
     float volumeRampMultiplier;
     float euclidNoteAmplitude;
     int euclidBeatDivisor;
+    
     
     int samplesLeftInCurrentEuclidNote;
     // TODO allow this to be perterbed to different lengths

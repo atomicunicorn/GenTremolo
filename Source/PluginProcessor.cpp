@@ -40,9 +40,6 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     blockCounter = 1;
     sampleCounter = 0;
     
-    globalNumSamplesPassed = 0;
-    
-    
     /* Initialize and add the parameters */
     
     // TODO use the value to text function to set the label to either on or off for automation
@@ -68,8 +65,9 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     isEuclid = false;
     isPlayingEuclidNote = false;
     samplesLeftInCurrentEuclidNote = 0;
-    euclidBeatDivisor = 32; //32; // default to 32nd note length
+    euclidBeatDivisor = 32; // default to 32nd note length
     euclidNoteAmplitude = 0.0f;
+    euclidStep = 0;
 //    euclidLinearSmoothedValue.reset(defaultSampleRate, ((double)volumeRampLengthInMs)/1000.0);
 //    pptPosition = 0; // global playhead position relative to 32nd notes
 }
@@ -275,7 +273,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int chaosIntervalSize = scaleChaosParameterToInt();
     EuclidGrid::EuclidNote noteStruct = {};
     int euclidNoteSampleLength = numSamples;
-    int euclidStepsPassed = 0;
+//    int euclidStepsPassed = 0;
     bool onEuclidStep = false;
     
     /* Make a temporary copy of any state variables declared in PluginProcessor.h which need to be
@@ -284,14 +282,13 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
      * the next channel.                                                                           */
     float temp_trem_lfo_phase_copy;
     temp_trem_lfo_phase_copy = trem_lfo_phase;
-    long temp_global_samples_passed;
-    temp_global_samples_passed = globalNumSamplesPassed;
     bool temp_is_playing_euclid_note;
     temp_is_playing_euclid_note = isPlayingEuclidNote;
     int temp_samples_left_in_current_euclid_note;
     temp_samples_left_in_current_euclid_note = samplesLeftInCurrentEuclidNote;
     float temp_euclid_gain;
     temp_euclid_gain = euclidNoteAmplitude;
+    int temp_euclid_step = euclidStep;
     
     // TODO MAKE SURE ALL THESE STATE VARS ARE COPIED BACK TO THEIR GLOBAL VALUES AT THE END
     
@@ -299,9 +296,11 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     AudioPlayHead* const playHead = getPlayHead();
     AudioPlayHead::CurrentPositionInfo result = {};
     if (playHead != nullptr) {
-        if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result)) {
+        if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result) && result.isPlaying) {
             const double bpm = result.bpm;
-            temp_global_samples_passed = (long)result.timeInSamples;
+            const double ppqCount = result.ppqPosition;
+            temp_euclid_step = 8*(int)round(ppqCount);
+            const int64 globalSamplesPassedSinceBlock = result.timeInSamples;
             
             /* Get rhythmic sample information */
             const int samplesPerQuarterNote = getSamplesPerQuarterNote(bpm, sampleRate);
@@ -336,15 +335,16 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 if (localisEuclid) {
                     
                     /* Euclidean Tremolo preparation - update onEuclidStep and call runGrid if on a euclid step */
-                    if (temp_global_samples_passed % samplesPer32ndNote == 0) {
-                        euclidStepsPassed++;
+                    if (((globalSamplesPassedSinceBlock+i) % samplesPer32ndNote) == 0) {
                         onEuclidStep = true;
+                        temp_euclid_step++;
+                        
                     } else {
                         onEuclidStep = false;
                     }
                     
                     if (onEuclidStep
-                        && euclidGrid->runGrid((long)euclidStepsPassed, samplesPerQuarterNote, euclidNoteSampleLength, noteStruct) ) {
+                        && euclidGrid->runGrid((long)temp_euclid_step, samplesPerQuarterNote, euclidNoteSampleLength, noteStruct) ) {
                         
                         if (!temp_is_playing_euclid_note && noteStruct.noteOn) { /* no euclid note is currently playing */
                             temp_is_playing_euclid_note = true; /* euclidGrid created a new note */
@@ -375,17 +375,16 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 
                 /* Increment sample counters and handle other sample bookkeeping*/
                 sampleCounter++;
-                temp_global_samples_passed++;
             }
             /* done iterating through and processing samples in block */
             
             /* Having made a local copy of the state variables for each channel, now transfer the result
              * back to the main state variable so they will be preserved for the next call of processBlock() */
             trem_lfo_phase = temp_trem_lfo_phase_copy;
-            globalNumSamplesPassed = temp_global_samples_passed;
             isPlayingEuclidNote = temp_is_playing_euclid_note;
             samplesLeftInCurrentEuclidNote = temp_samples_left_in_current_euclid_note;
             euclidNoteAmplitude = temp_euclid_gain;
+            euclidStep = temp_euclid_step;
             
             /* In case we have more outputs than inputs, we'll clear any output
              * channels that didn't contain input data, (because these aren't

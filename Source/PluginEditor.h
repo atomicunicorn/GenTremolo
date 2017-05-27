@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "EuclidGrid.h"
+#include <string>
 
 
 //==============================================================================
@@ -71,6 +72,7 @@ private:
     Slider minBeatSlider;
     
     Label euclidIsPlayingLabel;
+    Label euclidStep;
     
 //    Label minBeatLabel;
 //    TabbedButtonBar minBeatTabButtonBar;
