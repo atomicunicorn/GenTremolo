@@ -42,7 +42,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&standardToggleButton);
     standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
     
-    
+    /*** Chaos Slider Param ***/
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
     chaosSlider.setSliderStyle (Slider::LinearVertical);
     chaosSlider.setRange(0.0, 10.0, 1.0);
@@ -54,6 +54,31 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     chaosLabel.attachToComponent(&chaosSlider, true);
     addAndMakeVisible(&chaosLabel);
     chaosAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "chaosParamID", chaosSlider);
+    
+    /*** Map X Slider Param ***/
+    mapXSlider.setSliderStyle (Slider::LinearVertical);
+    mapXSlider.setRange(0.0, 10.0, 1.0);
+    mapXSlider.setChangeNotificationOnlyOnRelease(true);
+    mapXSlider.setPopupDisplayEnabled (false, this);
+//    mapXSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 10, 20);
+    addAndMakeVisible(&mapXSlider);
+    mapXLabel.setText("X", dontSendNotification);
+    mapXLabel.attachToComponent(&mapXSlider, true);
+    addAndMakeVisible(&mapXLabel);
+    mapXAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapXParamID", mapXSlider);
+    
+    /*** Map Y Slider Param ***/
+    mapYSlider.setSliderStyle (Slider::LinearVertical);
+    mapYSlider.setRange(0.0, 10.0, 1.0);
+    mapYSlider.setChangeNotificationOnlyOnRelease(true);
+    mapYSlider.setPopupDisplayEnabled (false, this);
+    //    mapXSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 10, 20);
+    addAndMakeVisible(&mapYSlider);
+    mapYLabel.setText("Y", dontSendNotification);
+    mapYLabel.attachToComponent(&mapYSlider, true);
+    addAndMakeVisible(&mapYLabel);
+    mapYAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapYParamID", mapYSlider);
+    
     
     minBeatSlider.setSliderStyle(Slider::IncDecButtons);
     minBeatSlider.setRange(0, 4, 1);
@@ -166,6 +191,8 @@ void GenTremoloAudioProcessorEditor::resized() {
     standardToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + euclidToggleButton.getHeight() + 5, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
+    mapXSlider.setBounds(chaosSlider.getRight()+chaosSlider.getWidth()/4, chaosSlider.getY(), chaosSlider.getWidth()/4, chaosSlider.getHeight());
+    mapYSlider.setBounds(mapXSlider.getRight()+mapXSlider.getWidth()/2+5, mapXSlider.getY(), mapXSlider.getWidth(), mapXSlider.getHeight());
     minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3, chaosSlider.getBottom() + 50, 140, 20);
     minBeatSlider.setBounds(chaosSlider.getX() - getWidth()/3 + minBeatLabel.getWidth(), chaosSlider.getBottom() + 50, 125, 25);
     

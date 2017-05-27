@@ -50,6 +50,8 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> standardAttachment;
     
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapXAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapYAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
 
     /* Components */
@@ -59,6 +61,11 @@ private:
     
     Label chaosLabel;
     Slider chaosSlider;
+    
+    Label mapXLabel;
+    Slider mapXSlider;
+    Label mapYLabel;
+    Slider mapYSlider;
     
     Label minBeatLabel;
     Slider minBeatSlider;

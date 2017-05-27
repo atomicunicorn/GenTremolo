@@ -54,6 +54,8 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
     
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    parameters.createAndAddParameter("mapXParamID", "MapX", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    parameters.createAndAddParameter("mapYParamID", "MapY", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
     // TODO use the value to text function to set the min beat label
     parameters.createAndAddParameter("minBeatParamID", "Min beat", String(), NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f, nullptr, nullptr);
     
@@ -66,7 +68,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     isEuclid = false;
     isPlayingEuclidNote = false;
     samplesLeftInCurrentEuclidNote = 0;
-    euclidBeatDivisor = 32; // default to 32nd note length
+    euclidBeatDivisor = 32; //32; // default to 32nd note length
     euclidNoteAmplitude = 0.0f;
 //    euclidLinearSmoothedValue.reset(defaultSampleRate, ((double)volumeRampLengthInMs)/1000.0);
 //    pptPosition = 0; // global playhead position relative to 32nd notes
@@ -254,6 +256,9 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const bool localisRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
     const bool localisStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
     const bool localisEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
+    euclidGrid->setMapX((const int)round(*parameters.getRawParameterValue("mapXParamID")*126.0f));
+    euclidGrid->setMapY((const int)round(*parameters.getRawParameterValue("mapYParamID")*126.0f));
+    euclidGrid->setRandomness((const int)round(*parameters.getRawParameterValue("chaosParamID")*126.0f));
     isEuclid = localisEuclid;
     
     /* Get sample and channel information */

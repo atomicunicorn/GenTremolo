@@ -96,10 +96,10 @@ private:
     
     const int defaultMapX = 64;
     const int defaultMapY = 64;
-    const int defaultRandomness = 10;
+    const int defaultRandomness = 60; //10;
     const int defaultPatternStep = 0;
     const int defaultPerterbation = 0;
-    const int defaultDensity = 32;
+    const int defaultDensity = 90; // 32;
     const int defaultEuclideanLength = 7; // !!! BD=5,SN=7,HH=11;
     const int defaultAmplitude = 0;
     const bool defaulIsOffNoteBool = false;

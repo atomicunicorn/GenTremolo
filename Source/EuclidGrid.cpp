@@ -61,6 +61,7 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     state = 0;
     evaluatePattern();
     output();
+    int noteLength = noteSampleLength;
     
     /* increment euclidean clock */
     euclideanStep = (euclideanStep + 1) % euclideanLength;
@@ -74,12 +75,14 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     if ((state & 2) > 0) { /* originally this would trigger the snare drum */
 //        generatedNoteLengthInSamples += samplesPerPatternStep*2;
         noteStruct.noteOn = true;
+        noteLength += noteSampleLength*2;
     }
     if ((state & 4) > 0) { /* originally this would trigger the high hat */
 //        generatedNoteLengthInSamples += samplesPerPatternStep*4;
+        noteLength += noteSampleLength*4;
     }
     
-    noteStruct.lengthInSamples = noteSampleLength;
+    noteStruct.lengthInSamples = noteLength;
     return true;
 }
 
