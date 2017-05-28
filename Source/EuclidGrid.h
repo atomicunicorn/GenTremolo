@@ -8,8 +8,10 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
-//#include <math.h>
+//#include "../JuceLibraryCode/JuceHeader.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <vector>
 
 /* Grid resolution should be every 32nd beat plus or minus the swing param. 
@@ -62,7 +64,7 @@ public:
     void resetToDefault();
     
     /* Pattern generation methods */
-    bool runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength, EuclidNote& noteStruct);
+    int runGrid(int playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap(int index);                     // originally referred to as readDrumMap
 
@@ -72,9 +74,6 @@ public:
 
     std::vector<std::vector<uint32_t>> beat_map;
     uint32_t getLevelFromBeatMap(int i, int j, int offset);
-    std::vector<uint32_t> getNodeFromBeatMap(int i, int j);
-    
-    Random randObj;
     
 private:
     bool isOffNoteBool;

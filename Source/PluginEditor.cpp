@@ -21,9 +21,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     // editor's size to whatever you need it to be.
     setSize (500, 400);
     
-    euclidIsPlayingLabel.setText("n playing", dontSendNotification);
-    addAndMakeVisible(&euclidIsPlayingLabel);
-    
     
     /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
@@ -101,8 +98,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
     
-    startTimer(15);
-    
 }
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
@@ -167,28 +162,11 @@ void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     }
 }
 
-void GenTremoloAudioProcessorEditor::hiResTimerCallback() {
-//    if (processor.isEuclid && processor.isPlayingEuclidNote) {
-//        String bString = processor.isPlayingEuclidNote ? "playing" : "not playing";
-//        euclidIsPlayingLabel.setText(bString, dontSendNotification);
-//    } else {
-//        if (processor.isEuclid) {
-//            String bString = processor.isPlayingEuclidNote ? "note on" : "note off";
-//            euclidIsPlayingLabel.setText(bString, dontSendNotification);
-//        }
-//    }
-    String stepString = std::to_string(processor.euclidStep);
-    euclidStep.setText(stepString, dontSendNotification);
-    euclidIsPlayingLabel.setText(stepString, dontSendNotification);
-}
-
 void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
     
     waveformComboBox.setBounds(getWidth()/2, 170 + getHeight()/4, getWidth()/3, getHeight()/7);
-    euclidIsPlayingLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 3, waveformComboBox.getWidth(), waveformComboBox.getHeight());
-    euclidStep.setBounds(euclidIsPlayingLabel.getX(), euclidIsPlayingLabel.getY()+10, euclidIsPlayingLabel.getWidth(), euclidIsPlayingLabel.getHeight());
     
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
     euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 5, randomToggleButton.getWidth(), randomToggleButton.getHeight());

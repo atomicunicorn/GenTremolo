@@ -99,6 +99,7 @@ public:
     int maxBeat;
     bool isPlayingEuclidNote;
     int euclidStep;
+    int lastEuclidStep;
 
 private:
     /* Audio Parameters */

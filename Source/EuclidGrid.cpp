@@ -20,17 +20,17 @@ EuclidGrid::EuclidGrid()
     randomness = defaultRandomness;
     state = defaultState;
     
-    randObj = Random::Random();
-    
     patternStep = 0;
     
     for (int i = 0; i < numParts; i++) {
         euclideanStep.push_back(defaultEuclideanStep);
         perterbation.push_back(defaultPerterbation);
         density.push_back(defaultDensity);
-        euclideanLength.push_back(defaultEuclideanLength);
         amplitude.push_back(defaultAmplitude);
     }
+    euclideanLength.push_back(5);
+    euclideanLength.push_back(7);
+    euclideanLength.push_back(11);
     
     isOffNoteBool = defaultIsOffNoteBool;
     
@@ -156,14 +156,12 @@ void EuclidGrid::resetToDefault() {
     patternStep = defaultPatternStep;
     isOffNoteBool = defaultIsOffNoteBool;
     state = defaultState;
-    randObj = Random::Random();
     
     if (euclideanStep.size() == numParts && perterbation.size() == numParts && density.size() == numParts && euclideanLength.size() == numParts && amplitude.size() == numParts) {
         for (int i = 0; i < numParts; i++) {
             euclideanStep[i] = defaultEuclideanStep;
             perterbation[i] = defaultPerterbation;
             density[i] = defaultDensity;
-            euclideanLength[i] = defaultEuclideanLength;
             amplitude[i] = defaultAmplitude;
         }
     } else {
@@ -176,58 +174,50 @@ void EuclidGrid::resetToDefault() {
             euclideanStep.push_back(defaultEuclideanStep);
             perterbation.push_back(defaultPerterbation);
             density.push_back(defaultDensity);
-            euclideanLength.push_back(defaultEuclideanLength);
             amplitude.push_back(defaultAmplitude);
         }
     }
+    euclideanLength.clear();
+    euclideanLength.push_back(5);
+    euclideanLength.push_back(7);
+    euclideanLength.push_back(11);
 }
 
 // TODO pass in the min and max beat values here to dicate return value range a bit
 /* returns the length that the input audio will be played (think of as note duration) 
  * returned value represents the number of samples the "note" lasts. */
-bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength, EuclidNote& noteStruct) {
+int EuclidGrid::runGrid(int playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength) {
     if (playHeadLocationBy32Notes < 0) {
-        resetToDefault();
-        return false;
+//        resetToDefault();
+        return 0;
     }
     
     patternStep = playHeadLocationBy32Notes % 32;
     state = 0;
     evaluatePattern();
+    
     /* increment euclidean clock */
     for (int i = 0; i < numParts; i++) {
-        euclideanStep[i] = (euclideanStep[i] + 1) % euclideanStep[i];
+        euclideanStep[i] = (euclideanStep[i] + 1) % euclideanLength[i];
     }
     
-    int noteLength = noteSampleLength;
-    noteStruct.noteOn = true;
-    
-    if ((state & 1) > 0) { /* originally this would trigger the kick drum */
-        noteLength += 1; // dummy placeholder
+    int noteLength = 0;
+    if ((state & 1) > 0) {                /* originally this would trigger the kick drum */
     }
-    if ((state & 2) > 0) { /* originally this would trigger the snare drum */
-        noteStruct.noteOn = true;
+    if ((state & 2) > 0)                /* originally this would trigger the snare drum */
         noteLength += noteSampleLength*2;
-    }
-    if ((state & 4) > 0) { /* originally this would trigger the high hat */
-//        generatedNoteLengthInSamples += samplesPerPatternStep*4;
+    if ((state & 4) > 0)               /* originally this would trigger the high hat */
         noteLength += noteSampleLength*4;
-    }
-    
-    noteStruct.lengthInSamples = noteLength;
-    return true;
+    return noteLength;
 }
 
-/* TODO maybe add more randomness to the instMask and accentBits? 
- * Also is instMask even needed? */
+/* TODO maybe add more randomness to the instMask and accentBits? */
 void EuclidGrid::evaluatePattern() {
     if (patternStep == 0) {
         for (int i = 0; i < numParts; i++) {
             randomness = randomness >> 2;
-//            unsigned int randSeed = (unsigned int)rand();
-            unsigned int randSeed = (unsigned int)randObj.nextInt();
-            unsigned int randTwo = randSeed%256;
-            perterbation[i] = (randTwo*randomness) >> 8;
+            unsigned int randSeed = ((unsigned int)rand())%256;
+            perterbation[i] = (randSeed*randomness) >> 8;
         }
     }
     unsigned int instMask = 1;
@@ -255,8 +245,8 @@ void EuclidGrid::evaluatePattern() {
 }
 
 int EuclidGrid::readPatternMap(int index) { // originally referred to as readDrumMap
-    int i = (int)floor(mapX*3.0 / 127);
-    int j = (int)floor(mapY*3.0 / 127);
+    int i = (int)floorf((float)mapX*3.0f / 127.0f);
+    int j = (int)floorf((float)mapY*3.0f / 127.0f);
     int offset = (index * stepsPerPattern) + patternStep;
 
     uint32_t a = getLevelFromBeatMap(i, j, offset);
@@ -269,8 +259,7 @@ int EuclidGrid::readPatternMap(int index) { // originally referred to as readDru
      * that is used on the grids hardware. */
     
     uint32_t r = (
-                  (a * mapX + b * (maxValue - mapX)) * mapY
-                  + (c * mapX + d * (maxValue - mapX)) * (maxValue - mapY)
+                  (a * mapX + b * (maxValue - mapX)) * mapY + (c * mapX + d * (maxValue - mapX)) * (maxValue - mapY)
                   ) / maxValue / maxValue;
 //    uint32_t r = u32Mix(u32Mix(a, b, mapX << 2), u32Mix(c, d, mapX << 2), mapY << 2);
     
@@ -350,16 +339,27 @@ void EuclidGrid::setDensity(int d, int index) {
 }
 
 void EuclidGrid::setEuclideanLength(int euclidLength, int index) {
-    if (index < 0 || index > numParts || index >= euclideanLength.size())
+    if (index <= 0 || index > numParts || index >= euclideanLength.size())
         return;
     if (euclidLength > 0 && euclidLength <= 32)
         euclideanLength[index] = euclidLength;
 }
 
-std::vector<uint32_t> EuclidGrid::getNodeFromBeatMap(int i, int j) {
-    /* variable i is synonymous to the row, j to the column */
-//    int nodeIndex = (i*5) + j;
-//    return EuclidGrid::beat_map[nodeIndex];
-    return node_0;
-}
+/* for hand-testing only. comment out the main function during plugin generation */
+
+//int main() {
+//    printf("Creating EuclidGrid object...\n");
+//    int samplesPerQuarterNote = 22050;
+//    int samplesPer16thNote = (int)floorf((float)samplesPerQuarterNote/4.0f);
+//    int egNoteLength = 0;
+//    EuclidGrid eg = EuclidGrid();
+//    for (int i = 0; i < 64; i++) {
+//        printf("calling runGrid on pattern step %d\n", i);
+//        egNoteLength = eg.runGrid(i, samplesPerQuarterNote, samplesPer16thNote);
+//        printf("note length from runGrid call on step %d", i);
+//        printf(": %d\n", egNoteLength);
+//    }
+//    printf("done.\n");
+//    return 0;
+//}
 
