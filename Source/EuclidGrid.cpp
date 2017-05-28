@@ -18,30 +18,131 @@ EuclidGrid::EuclidGrid()
     mapX = defaultMapX;
     mapY = defaultMapY;
     randomness = defaultRandomness;
+    state = defaultState;
+    
+    randObj = Random::Random();
     
     patternStep = 0;
     
-    euclideanStep[0] = 0;
-    euclideanStep[1] = 0;
-    euclideanStep[2] = 0;
+    for (int i = 0; i < numParts; i++) {
+        euclideanStep.push_back(defaultEuclideanStep);
+        perterbation.push_back(defaultPerterbation);
+        density.push_back(defaultDensity);
+        euclideanLength.push_back(defaultEuclideanLength);
+        amplitude.push_back(defaultAmplitude);
+    }
     
-    perterbation[0] = defaultPerterbation;
-    perterbation[1] = defaultPerterbation;
-    perterbation[2] = defaultPerterbation;
+    isOffNoteBool = defaultIsOffNoteBool;
     
-    density[0] = defaultDensity;
-    density[1] = defaultDensity;
-    density[2] = defaultDensity;
+    node_0.push_back(255);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(145);
+    node_0.push_back(0);
     
-    euclideanLength[0] = 5;
-    euclideanLength[1] = 7;
-    euclideanLength[2] = 11;
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(218);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
     
-    amplitude[0] = defaultAmplitude;
-    amplitude[1] = defaultAmplitude;
-    amplitude[2] = defaultAmplitude;
+    node_0.push_back(72);
+    node_0.push_back(36);
+    node_0.push_back(0);
+    node_0.push_back(182);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
     
-    isOffNoteBool = defaulIsOffNoteBool;
+    node_0.push_back(109);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(72);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    
+    node_0.push_back(36);
+    node_0.push_back(0);
+    node_0.push_back(109);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(8);
+    node_0.push_back(0);
+    
+    node_0.push_back(255);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(72);
+    node_0.push_back(0);
+    
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(182);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(36);
+    node_0.push_back(0);
+    
+    node_0.push_back(218);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(145);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    node_0.push_back(0);
+    
+    node_0.push_back(170);
+    node_0.push_back(0);
+    node_0.push_back(113);
+    node_0.push_back(0);
+    node_0.push_back(255);
+    node_0.push_back(0);
+    node_0.push_back(56);
+    node_0.push_back(0);
+    
+    node_0.push_back(170);
+    node_0.push_back(0);
+    node_0.push_back(141);
+    node_0.push_back(0);
+    node_0.push_back(198);
+    node_0.push_back(0);
+    node_0.push_back(56);
+    node_0.push_back(0);
+    
+    node_0.push_back(170);
+    node_0.push_back(0);
+    node_0.push_back(113);
+    node_0.push_back(0);
+    node_0.push_back(226);
+    node_0.push_back(0);
+    node_0.push_back(28);
+    node_0.push_back(0);
+    
+    node_0.push_back(170);
+    node_0.push_back(0);
+    node_0.push_back(113);
+    node_0.push_back(0);
+    node_0.push_back(198);
+    node_0.push_back(0);
+    node_0.push_back(85);
+    node_0.push_back(0);
+    
+    beat_map.push_back(node_0);
+    
 }
 
 EuclidGrid::~EuclidGrid()
@@ -53,34 +154,32 @@ void EuclidGrid::resetToDefault() {
     mapY = defaultMapY;
     randomness = defaultRandomness;
     patternStep = defaultPatternStep;
+    isOffNoteBool = defaultIsOffNoteBool;
+    state = defaultState;
+    randObj = Random::Random();
     
-    perterbation[0] = defaultPerterbation;
-    perterbation[1] = defaultPerterbation;
-    perterbation[2] = defaultPerterbation;
-    
-    density[0] = defaultDensity;
-    density[1] = defaultDensity;
-    density[2] = defaultDensity;
-    
-    euclideanLength[0] = 5;
-    euclideanLength[1] = 7;
-    euclideanLength[2] = 11;
-    
-    amplitude[0] = defaultAmplitude;
-    amplitude[1] = defaultAmplitude;
-    amplitude[2] = defaultAmplitude;
-    
-    isOffNoteBool = defaulIsOffNoteBool;
-}
-
-void EuclidGrid::reset() {
-    euclideanStep[0] = 0;
-    euclideanStep[1] = 0;
-    euclideanStep[2] = 0;
-    
-    patternStep = 0;
-    state = 0;
-    isOffNoteBool = false;
+    if (euclideanStep.size() == numParts && perterbation.size() == numParts && density.size() == numParts && euclideanLength.size() == numParts && amplitude.size() == numParts) {
+        for (int i = 0; i < numParts; i++) {
+            euclideanStep[i] = defaultEuclideanStep;
+            perterbation[i] = defaultPerterbation;
+            density[i] = defaultDensity;
+            euclideanLength[i] = defaultEuclideanLength;
+            amplitude[i] = defaultAmplitude;
+        }
+    } else {
+        euclideanStep.clear();
+        perterbation.clear();
+        density.clear();
+        euclideanLength.clear();
+        amplitude.clear();
+        for (int i = 0; i < numParts; i++) {
+            euclideanStep.push_back(defaultEuclideanStep);
+            perterbation.push_back(defaultPerterbation);
+            density.push_back(defaultDensity);
+            euclideanLength.push_back(defaultEuclideanLength);
+            amplitude.push_back(defaultAmplitude);
+        }
+    }
 }
 
 // TODO pass in the min and max beat values here to dicate return value range a bit
@@ -91,12 +190,10 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
         resetToDefault();
         return false;
     }
+    
     patternStep = playHeadLocationBy32Notes % 32;
     state = 0;
-    
     evaluatePattern();
-    output();
-    
     /* increment euclidean clock */
     for (int i = 0; i < numParts; i++) {
         euclideanStep[i] = (euclideanStep[i] + 1) % euclideanStep[i];
@@ -105,12 +202,10 @@ bool EuclidGrid::runGrid(long playHeadLocationBy32Notes, int samplesPerQuarterNo
     int noteLength = noteSampleLength;
     noteStruct.noteOn = true;
     
-//    int generatedNoteLengthInSamples = 0;
     if ((state & 1) > 0) { /* originally this would trigger the kick drum */
-//        generatedNoteLengthInSamples += samplesPerPatternStep*2;
+        noteLength += 1; // dummy placeholder
     }
     if ((state & 2) > 0) { /* originally this would trigger the snare drum */
-//        generatedNoteLengthInSamples += samplesPerPatternStep*2;
         noteStruct.noteOn = true;
         noteLength += noteSampleLength*2;
     }
@@ -129,7 +224,8 @@ void EuclidGrid::evaluatePattern() {
     if (patternStep == 0) {
         for (int i = 0; i < numParts; i++) {
             randomness = randomness >> 2;
-            unsigned int randSeed = (unsigned int)rand();
+//            unsigned int randSeed = (unsigned int)rand();
+            unsigned int randSeed = (unsigned int)randObj.nextInt();
             unsigned int randTwo = randSeed%256;
             perterbation[i] = (randTwo*randomness) >> 8;
         }
@@ -158,27 +254,18 @@ void EuclidGrid::evaluatePattern() {
     state |= accentBits << 3;
 }
 
-// TODO maybe switch all these values over to uint8_t
 int EuclidGrid::readPatternMap(int index) { // originally referred to as readDrumMap
     int i = (int)floor(mapX*3.0 / 127);
     int j = (int)floor(mapY*3.0 / 127);
-    
-    //XXX the null pointer issue is probably here
-    
-    uint32_t* mapA = beat_map[i][j];
-    uint32_t* mapB = beat_map[i + 1][j];
-    uint32_t* mapC = beat_map[i][j + 1];
-    uint32_t* mapD = beat_map[i + 1][j + 1];
-    
     int offset = (index * stepsPerPattern) + patternStep;
-    uint32_t a = mapA[offset];
-    uint32_t b = mapB[offset];
-    uint32_t c = mapC[offset];
-    uint32_t d = mapD[offset];
-    uint32_t maxValue = 127;
+
+    uint32_t a = getLevelFromBeatMap(i, j, offset);
+    uint32_t b = getLevelFromBeatMap(i + 1, j, offset);
+    uint32_t c = getLevelFromBeatMap(i, j + 1, offset);
+    uint32_t d = getLevelFromBeatMap(i + 1, j + 1, offset);
     
-    /* Below the non-function-call assignment of r is what was on the max patch version.
-     * The uncommented assignment of r follows more in line with the U8Mix function
+    /* Below the inline assignment of r is what was used in the max patch.
+     * The uncommented assignment of r follows more with the U8Mix function
      * that is used on the grids hardware. */
     
     uint32_t r = (
@@ -186,7 +273,23 @@ int EuclidGrid::readPatternMap(int index) { // originally referred to as readDru
                   + (c * mapX + d * (maxValue - mapX)) * (maxValue - mapY)
                   ) / maxValue / maxValue;
 //    uint32_t r = u32Mix(u32Mix(a, b, mapX << 2), u32Mix(c, d, mapX << 2), mapY << 2);
+    
     return r;
+}
+
+uint32_t EuclidGrid::getLevelFromBeatMap(int i, int j, int offset) {
+    /* i is the beatmap's row, j is the column, and offset is the index within a given node */
+    if (i > 4 || j > 4 || i < 0 || j < 0 || offset > 95 || offset < 0) {
+        return 0;
+    }
+    int beatMapOffset = i*5 + j;
+    if (beat_map.empty() || beat_map.size() <= beatMapOffset) {
+        return 0;
+    }
+    if (beat_map.empty() || beat_map[beatMapOffset].size() <= offset) {
+        return 0;
+    }
+    return beat_map[beatMapOffset][offset];
 }
 
 uint32_t EuclidGrid::u32Mix(uint32_t first, uint32_t second, uint32_t maxVal) {
@@ -194,9 +297,6 @@ uint32_t EuclidGrid::u32Mix(uint32_t first, uint32_t second, uint32_t maxVal) {
         return second;
     }
     return maxVal*second + (255 - maxVal) * (first >> 8);
-}
-
-void EuclidGrid::output() {
 }
 
 int EuclidGrid::getMapX() {
@@ -212,13 +312,13 @@ int EuclidGrid::getRandomness() {
 }
 
 int EuclidGrid::getDensity(int index) {
-    if (index < 0 || index > numParts)
+    if (index < 0 || index > numParts || index >= density.size())
         return -1;
     return density[index];
 }
 
 int EuclidGrid::getEuclideanLength(int index) {
-    if (index < 0 || index > numParts)
+    if (index < 0 || index > numParts || index >= euclideanLength.size())
         return -1;
     return euclideanLength[index];
 }
@@ -243,80 +343,23 @@ void EuclidGrid::setRandomness(int r) {
 }
 
 void EuclidGrid::setDensity(int d, int index) {
-    if (index < 0 || index > numParts)
+    if (index < 0 || index > numParts || index >= density.size())
         return;
     if (d >= 0 && d <= 127)
         density[index] = d;
 }
 
 void EuclidGrid::setEuclideanLength(int euclidLength, int index) {
-    if (index < 0 || index > numParts)
+    if (index < 0 || index > numParts || index >= euclideanLength.size())
         return;
     if (euclidLength > 0 && euclidLength <= 32)
         euclideanLength[index] = euclidLength;
 }
 
-uint32_t* EuclidGrid::getNodeByIndex(int index) {
-    if (index < 0 || index > 24) {
-        return nullptr;
-    }
-    switch (index) {
-        case 0:
-            return node_0;
-        case 1:
-            return node_1;
-        case 2:
-            return node_2;
-        case 3:
-            return node_3;
-        case 4:
-            return node_4;
-        case 5:
-            return node_5;
-        case 6:
-            return node_6;
-        case 7:
-            return node_7;
-        case 8:
-            return node_8;
-        case 9:
-            return node_9;
-        case 10:
-            return node_10;
-        case 11:
-            return node_11;
-        case 12:
-            return node_12;
-        case 13:
-            return node_13;
-        case 14:
-            return node_14;
-        case 15:
-            return node_15;
-        case 16:
-            return node_16;
-        case 17:
-            return node_17;
-        case 18:
-            return node_18;
-        case 19:
-            return node_19;
-        case 20:
-            return node_20;
-        case 21:
-            return node_21;
-        case 22:
-            return node_22;
-        case 23:
-            return node_23;
-        case 24:
-            return node_24;
-        default:
-            return nullptr;
-    }
+std::vector<uint32_t> EuclidGrid::getNodeFromBeatMap(int i, int j) {
+    /* variable i is synonymous to the row, j to the column */
+//    int nodeIndex = (i*5) + j;
+//    return EuclidGrid::beat_map[nodeIndex];
+    return node_0;
 }
-
-//uint32_t* EuclidGrid::getBeatMap() {
-//    return beat_map;
-//}
 
