@@ -112,7 +112,7 @@ public:
     int gridSampLen;
     int euclidSampleCounter;
     int euclidNoteSampleLen;
-    int64 sampleCounter;
+    int64 randSampleCounter;
 
 private:
     /* Audio Parameters */

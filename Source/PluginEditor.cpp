@@ -100,7 +100,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
     
-    startTimer(300);
+    startTimer(100);
     
 }
 
@@ -166,10 +166,11 @@ void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     }
 }
 
+/* For testing purposes */
 void GenTremoloAudioProcessorEditor::timerCallback() {
     if (processor.isEuclid) {
-//        euclidLabel.setText(String("0s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
-        euclidLabel.setText(String("s ") + String(processor.euclidStep) + String(" L") + String(processor.euclidNoteSampleLen), dontSendNotification);
+        euclidLabel.setText(String("s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
+//        euclidLabel.setText(String("s ") + String(processor.euclidStep) + String(" L") + String(processor.euclidNoteSampleLen), dontSendNotification);
     } else {
         euclidLabel.setText("off", dontSendNotification);
     }

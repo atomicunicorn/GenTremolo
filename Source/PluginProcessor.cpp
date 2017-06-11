@@ -38,7 +38,8 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     minBeat = k64th;
     maxBeat = k2;
     blockCounter = 1;
-    sampleCounter = 0;
+    randSampleCounter = 0;
+    euclidSampleCounter = 0;
     
     /* Initialize and add the parameters */
     
@@ -65,7 +66,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     isEuclid = false;
     isPlayingEuclidNote = false;
     samplesLeftInCurrentEuclidNote = 0;
-    euclidBeatDivisor = 16; // default to 32nd note length
+    euclidBeatDivisor = 4; // default to 32nd note length
     euclidNoteAmplitude = 0.0f;
     euclidStep = 0;
     gridsCallCountValid = 0; // for testing
@@ -284,12 +285,6 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     if (playHead != nullptr) {
         if (GenTremoloAudioProcessor::getPlayHead()->getCurrentPosition(result) && result.isPlaying) {
             const double bpm = result.bpm;
-            const double ppqCount = result.ppqPosition;
-            
-            /* TODO need smarter way to sync the euclidStep to the grid since this relies on sampleCounter which can have arbitrary start values. the result.timeInSamples validity may be questionable at the moment. */
-//            prevEuclidStep = (int)(8*floor(ppqCount));
-//            euclidStep = prevEuclidStep;
-//            const int globalSamplesPassedSinceBlock = (int)result.timeInSamples;
             
             /* Get rhythmic sample information */
             const int samplesPerQuarterNote = getSamplesPerQuarterNote(bpm, sampleRate);
@@ -314,12 +309,12 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 const float inRight = channelDataRight[i];
                 
                 /*** Random Tremolo Preparation ***/
-                if (isRandom && (sampleCounter % samplesPerBeatIndicator*chaosIntervalSize) == 0) {
+                if (isRandom && (randSampleCounter % samplesPerBeatIndicator*chaosIntervalSize) == 0) {
                     trem_frequency = next_trem_frequency;
                     randVal = rand() + 1;
                     trem_beat_indicator = BeatIndicators(randVal % 5);
                     next_trem_frequency = getUpdatedTremFrequency(bpm);       //XXX create temporary variables for these
-                    sampleCounter = 0;
+                    randSampleCounter = 0;
                 }
                 
                 /*** Euclidean Tremolo Logic ***/
@@ -351,7 +346,8 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     temp_trem_lfo_phase_copy -= 1.0;
                 
                 /* Increment sample counters and handle other sample bookkeeping*/
-                sampleCounter++;
+                randSampleCounter++;
+                euclidSampleCounter++;
             }
             /*** done iterating through and processing samples in block ***/
             
@@ -393,7 +389,7 @@ void GenTremoloAudioProcessor::updateEuclid() {
 }
 
 bool GenTremoloAudioProcessor::onEuclidStep(int samplesPerEuclidPatternStep) {
-    if ((sampleCounter % samplesPerEuclidPatternStep) == 0) {
+    if ((euclidSampleCounter % samplesPerEuclidPatternStep) == 0) {
 //        prevEuclidStep = euclidStep;
         euclidStep++;
         return true;
