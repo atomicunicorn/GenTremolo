@@ -21,6 +21,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     // editor's size to whatever you need it to be.
     setSize (500, 400);
     
+    euclidLabel.setText("init", dontSendNotification);
+    addAndMakeVisible(&euclidLabel);
     
     /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
@@ -98,6 +100,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
     
+    startTimer(300);
+    
 }
 
 GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
@@ -162,11 +166,21 @@ void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     }
 }
 
+void GenTremoloAudioProcessorEditor::timerCallback() {
+    if (processor.isEuclid) {
+//        euclidLabel.setText(String("0s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
+        euclidLabel.setText(String("s ") + String(processor.euclidStep) + String(" L") + String(processor.euclidNoteSampleLen), dontSendNotification);
+    } else {
+        euclidLabel.setText("off", dontSendNotification);
+    }
+}
+
 void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
     
     waveformComboBox.setBounds(getWidth()/2, 170 + getHeight()/4, getWidth()/3, getHeight()/7);
+    euclidLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 3, waveformComboBox.getWidth(), waveformComboBox.getHeight());
     
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
     euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 5, randomToggleButton.getWidth(), randomToggleButton.getHeight());

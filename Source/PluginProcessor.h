@@ -63,6 +63,12 @@ public:
     int getEuclidNoteSampleLength(int samplesPerQuarterNote);
     float getUpdatedTremFrequency(double bpm);
     int scaleChaosParameterToInt();
+    void updateEuclid();
+    bool onEuclidStep(int samplesPerEuclidPatternStep);
+    
+    EuclidGrid::EuclidNote noteStruct;
+    
+    
     
     enum BeatIndicators
     {
@@ -99,7 +105,14 @@ public:
     int maxBeat;
     bool isPlayingEuclidNote;
     int euclidStep;
-    int lastEuclidStep;
+    int prevEuclidStep;
+    int samplesLeftInCurrentEuclidNote;
+    
+    int gridsCallCountValid;
+    int gridSampLen;
+    int euclidSampleCounter;
+    int euclidNoteSampleLen;
+    int64 sampleCounter;
 
 private:
     /* Audio Parameters */
@@ -119,12 +132,12 @@ private:
     int euclidBeatDivisor;
     
     
-    int samplesLeftInCurrentEuclidNote;
+    
     // TODO allow this to be perterbed to different lengths
     
     LinearSmoothedValue<float> euclidLinearSmoothedValue;
     
-    int sampleCounter;
+    
     long globalNumSamplesPassed;
     float min_frequency = 0.5;
     float max_frequency = 8.0;

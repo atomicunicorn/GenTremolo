@@ -19,8 +19,7 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener, private Slider::Listener
-//, private Timer
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener, private Slider::Listener, private Timer
 {
 public:
     GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor&, AudioProcessorValueTreeState& vts);
@@ -31,6 +30,7 @@ public:
     void resized() override;
     void comboBoxChanged(ComboBox* comboBox) override;
     void sliderValueChanged(Slider* slider) override;
+    void timerCallback() override;
     
     /* public attributes */
     const int numMinBeatTabs = 5;
@@ -68,6 +68,8 @@ private:
     
     Label minBeatLabel;
     Slider minBeatSlider;
+    
+    Label euclidLabel;
     
     ComboBox waveformComboBox;
     

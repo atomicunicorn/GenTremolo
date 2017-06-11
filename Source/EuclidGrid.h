@@ -37,6 +37,7 @@ public:
     
     /* Structs */
     struct EuclidNote {
+        bool success;
         int lengthInSamples;
         bool noteOn;
     };
@@ -62,18 +63,45 @@ public:
     void setDensity(int d, int index);
     void setEuclideanLength(int euclidLength, int index);
     void resetToDefault();
+    void buildBeatMap();
     
     /* Pattern generation methods */
-    int runGrid(int playHeadLocationBy32Notes, int samplesPerQuarterNote, int noteSampleLength);
+    void runGrid(const int playHeadLocationBy32Notes, const int noteSampleLength, EuclidNote& noteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap(int index);                     // originally referred to as readDrumMap
 
     /* Beat Vectors - be careful!! https://stackoverflow.com/questions/2117313/initializing-constant-static-array-in-header-file */
 
     std::vector<uint32_t> node_0;
+    std::vector<uint32_t> node_1;
+    std::vector<uint32_t> node_2;
+    std::vector<uint32_t> node_3;
+    std::vector<uint32_t> node_4;
+    std::vector<uint32_t> node_5;
+    std::vector<uint32_t> node_6;
+    std::vector<uint32_t> node_7;
+    std::vector<uint32_t> node_8;
+    std::vector<uint32_t> node_9;
+    std::vector<uint32_t> node_10;
+    std::vector<uint32_t> node_11;
+    std::vector<uint32_t> node_12;
+    std::vector<uint32_t> node_13;
+    std::vector<uint32_t> node_14;
+    std::vector<uint32_t> node_15;
+    std::vector<uint32_t> node_16;
+    std::vector<uint32_t> node_17;
+    std::vector<uint32_t> node_18;
+    std::vector<uint32_t> node_19;
+    std::vector<uint32_t> node_20;
+    std::vector<uint32_t> node_21;
+    std::vector<uint32_t> node_22;
+    std::vector<uint32_t> node_23;
+    std::vector<uint32_t> node_24;
 
     std::vector<std::vector<uint32_t>> beat_map;
     uint32_t getLevelFromBeatMap(int i, int j, int offset);
+    
+    unsigned int state;
     
 private:
     bool isOffNoteBool;
@@ -88,14 +116,14 @@ private:
     std::vector<int> euclideanStep;    // !!!
     std::vector<int> perterbation;     // !!!
     std::vector<int> amplitude;         // !!! - originally referred to as velocity
-    unsigned int state;
+    
     
     const int defaultMapX = 64;
     const int defaultMapY = 64;
-    const int defaultRandomness = 60; //10;
+    const int defaultRandomness = 10;
     const int defaultPatternStep = 0;
     const int defaultPerterbation = 0;
-    const int defaultDensity = 90; // 32;
+    const int defaultDensity = 32;
     const int defaultEuclideanLength = 7; // !!! BD=5,SN=7,HH=11;
     const int defaultEuclideanStep = 0;
     const int defaultAmplitude = 0;
