@@ -98,7 +98,7 @@ void EuclidGrid::runGrid(const int playHeadLocationBy32Notes, const int noteSamp
         euclideanStep[i] = (euclideanStep[i] + 1) % euclideanLength[i];
     }
     
-    int noteLength = 0;
+    int noteLength = noteSampleLength;
     if ((state & 1) > 0) {                /* originally this would trigger the kick drum */
         noteLength += noteSampleLength;
         noteStruct.noteOn = true;
@@ -108,14 +108,17 @@ void EuclidGrid::runGrid(const int playHeadLocationBy32Notes, const int noteSamp
         noteStruct.noteOn = true;
     }
     if ((state & 4) > 0) {              /* originally this would trigger the high hat */
-        noteLength = noteSampleLength;
+        if (state % 2 == 0) {
+            noteLength = noteSampleLength << 2;
+        } else {
+            noteLength = noteSampleLength >> 2;
+        }
         noteStruct.noteOn = true;
     }
     noteStruct.lengthInSamples = (const int)noteLength;
     noteStruct.success = true;
 }
 
-/* TODO maybe add more randomness to the instMask and accentBits? */
 void EuclidGrid::evaluatePattern() {
     if (patternStep == 0) {
         for (int i = 0; i < numParts; i++) {
@@ -139,7 +142,7 @@ void EuclidGrid::evaluatePattern() {
             if (level > 192) {
                 accentBits |= instMask;
             }
-//          amplitude[i] = level / 2;   // not actually used right now
+            amplitude[i] = level / 2;   // not actually used right now
             state |= instMask;
         }
         instMask <<= 1;

@@ -29,17 +29,20 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     randomToggleButton.setRadioGroupId(modeRadioGroupID);
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
+    randomToggleButton.addListener(this);
     
     euclidToggleButton.setButtonText("Euclidean");
     euclidToggleButton.setRadioGroupId(modeRadioGroupID);
     addAndMakeVisible(&euclidToggleButton);
     euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidToggleButton);
+    euclidToggleButton.addListener(this);
     
     standardToggleButton.setButtonText("Standard");
     standardToggleButton.setRadioGroupId(modeRadioGroupID);
     standardToggleButton.setToggleState(true, dontSendNotification);
     addAndMakeVisible(&standardToggleButton);
     standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
+    standardToggleButton.addListener(this);
     
     /*** Chaos Slider Param ***/
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
@@ -143,36 +146,66 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
 
 void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     if (slider == &minBeatSlider) {
-        switch ((int)slider->getValue()) {
-            case 0:
-                minBeatLabel.setText("min beat: 1/64th", dontSendNotification);
-                break;
-            case 1:
-                minBeatLabel.setText("min beat: 1/32nd", dontSendNotification);
-                break;
-            case 2:
-                minBeatLabel.setText("min beat: 1/16th", dontSendNotification);
-                break;
-            case 3:
-                minBeatLabel.setText("min beat: 1/8th", dontSendNotification);
-                break;
-            case 4:
-                minBeatLabel.setText("min beat: 1/4th", dontSendNotification);
-                break;
-            default:
-                minBeatLabel.setText("min beat: n/a", dontSendNotification);
-                break;
-        }
+        if (randomToggleButton.getToggleState() || standardToggleButton.getToggleState())
+            minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
+        if (euclidToggleButton.getToggleState())
+            minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+    }
+}
+
+String GenTremoloAudioProcessorEditor::getMinBeatString() {
+    switch ((int)minBeatSlider.getValue()) {
+        case 0:
+            return "1/64th";
+        case 1:
+            return "1/32nd";
+        case 2:
+            return "1/16th";
+        case 3:
+            return "1/8th";
+        case 4:
+            return "1/4th";
+        default:
+            return "n/a";
+    }
+}
+
+
+// TODO deal with the fact that the min beat slider has two choices for 1/4th... 64th beat doesn't work because its too small for euclidgrid resolution.
+String GenTremoloAudioProcessorEditor::getGridBeatString() {
+    switch ((int)minBeatSlider.getValue()) {
+        case 0:
+            return "1/32nd";
+        case 1:
+            return "1/16th";
+        case 2:
+            return "1/8th";
+        case 3:
+            return "1/4th";
+        case 4:
+            return "1/2";
+        default:
+            return "n/a";
+    }
+}
+
+void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
+    if (button == &randomToggleButton || button == &standardToggleButton) {
+        minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
+    }
+    if (button == &euclidToggleButton) {
+        minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
     }
 }
 
 /* For testing purposes */
 void GenTremoloAudioProcessorEditor::timerCallback() {
     if (processor.isEuclid) {
-        euclidLabel.setText(String("s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
+        euclidLabel.setText(String(processor.euclidBeatDivisor) + String("s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
 //        euclidLabel.setText(String("s ") + String(processor.euclidStep) + String(" L") + String(processor.euclidNoteSampleLen), dontSendNotification);
     } else {
         euclidLabel.setText("off", dontSendNotification);
+//        minBeatLabel.setText("Min Beat", dontSendNotification);
     }
 }
 

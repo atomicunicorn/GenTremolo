@@ -19,7 +19,7 @@
 //==============================================================================
 /**
 */
-class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener, private Slider::Listener, private Timer
+class GenTremoloAudioProcessorEditor  : public AudioProcessorEditor, private ComboBox::Listener, private Slider::Listener, private Button::Listener, private Timer
 {
 public:
     GenTremoloAudioProcessorEditor (GenTremoloAudioProcessor&, AudioProcessorValueTreeState& vts);
@@ -30,7 +30,11 @@ public:
     void resized() override;
     void comboBoxChanged(ComboBox* comboBox) override;
     void sliderValueChanged(Slider* slider) override;
+    void buttonClicked(Button* button) override;
     void timerCallback() override;
+    
+    String getMinBeatString();
+    String getGridBeatString();
     
     /* public attributes */
     const int numMinBeatTabs = 5;
@@ -52,6 +56,7 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapXAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapYAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment;
 
     /* Components */
     ToggleButton randomToggleButton;  // TODO enable radio toggle buttons (see button.h) between normal, random, and euclid modes
@@ -68,6 +73,9 @@ private:
     
     Label minBeatLabel;
     Slider minBeatSlider;
+    
+    Label euclidBeatLabel;
+    Slider euclidBeatSlider;
     
     Label euclidLabel;
     

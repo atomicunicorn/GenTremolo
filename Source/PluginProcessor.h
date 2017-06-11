@@ -62,9 +62,10 @@ public:
     int getSamplesPerBeat(int beatIndicator, int samplesPerQuarterNote);
     int getEuclidNoteSampleLength(int samplesPerQuarterNote);
     float getUpdatedTremFrequency(double bpm);
-    int scaleChaosParameterToInt();
-    void updateEuclid();
+    int scaleChaosParameterToInt(float rawValue);
+    void updateEuclidGrid();
     bool onEuclidStep(int samplesPerEuclidPatternStep);
+    void updateEuclidAmplitudeAndNoteLength(int volumeRampSampleLength, int samplesPer32ndNote);
     
     EuclidGrid::EuclidNote noteStruct;
     
@@ -109,10 +110,15 @@ public:
     int samplesLeftInCurrentEuclidNote;
     
     int gridsCallCountValid;
-    int gridSampLen;
     int euclidSampleCounter;
     int euclidNoteSampleLen;
+    int euclidBeatDivisor;
     int64 randSampleCounter;
+    
+    BeatIndicators getBeatIndicatorFromParam(float rawValue);
+    int beatIndicatorToEuclidBeatDivisor(float rawValue);
+    
+    
 
 private:
     /* Audio Parameters */
@@ -129,7 +135,7 @@ private:
     ScopedPointer<EuclidGrid> euclidGrid;
     float volumeRampMultiplier;
     float euclidNoteAmplitude;
-    int euclidBeatDivisor;
+    
     
     
     
