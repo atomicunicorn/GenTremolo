@@ -44,6 +44,10 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
     standardToggleButton.addListener(this);
     
+    stereoToggleButton.setButtonText("Stereo");
+    addAndMakeVisible(&stereoToggleButton);
+    stereoAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "stereoParamID", stereoToggleButton);
+    
     /*** Chaos Slider Param ***/
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
     chaosSlider.setSliderStyle (Slider::LinearVertical);
@@ -202,10 +206,8 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
 void GenTremoloAudioProcessorEditor::timerCallback() {
     if (processor.isEuclid) {
         euclidLabel.setText(String(processor.euclidBeatDivisor) + String("s ") + String(processor.gridsCallCountValid) + String(" ") + String(processor.samplesLeftInCurrentEuclidNote), dontSendNotification);
-//        euclidLabel.setText(String("s ") + String(processor.euclidStep) + String(" L") + String(processor.euclidNoteSampleLen), dontSendNotification);
     } else {
         euclidLabel.setText("off", dontSendNotification);
-//        minBeatLabel.setText("Min Beat", dontSendNotification);
     }
 }
 
@@ -218,6 +220,7 @@ void GenTremoloAudioProcessorEditor::resized() {
     
     randomToggleButton.setBounds(getWidth()/2, 30, getWidth()/5, getHeight()/6);
     euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 5, randomToggleButton.getWidth(), randomToggleButton.getHeight());
+    stereoToggleButton.setBounds(euclidToggleButton.getX() + euclidToggleButton.getWidth(), euclidToggleButton.getY(), euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     standardToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + euclidToggleButton.getHeight() + 5, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);

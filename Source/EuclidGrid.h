@@ -43,6 +43,7 @@ public:
     };
     
     struct StereoEuclidNote {
+        bool success;
         int leftLengthInSamples;
         int rightLengthInSamples;
         bool leftNoteOn;
@@ -55,7 +56,6 @@ public:
     int getRandomness();
     int getDensity(int index);
     int getEuclideanLength(int index);
-    bool isOffNote();
     
     void setMapX(int x);
     void setMapY(int y);
@@ -66,7 +66,7 @@ public:
     void buildBeatMap();
     
     /* Pattern generation methods */
-    void runGrid(const int playHeadLocationBy32Notes, const int noteSampleLength, EuclidNote& noteStruct);
+    void runGrid(const int playHeadLocationBy32Notes, const int noteSampleLength, bool isStereo, EuclidNote& noteStruct, StereoEuclidNote& stereoNoteStruct);
     void evaluatePattern();                  // originally referred to as evaluateDrums
     int readPatternMap(int index);                     // originally referred to as readDrumMap
 
@@ -104,7 +104,6 @@ public:
     unsigned int state;
     
 private:
-    bool isOffNoteBool;
     int mapX;
     int mapY;
     int randomness;
@@ -128,7 +127,6 @@ private:
     const int defaultEuclideanStep = 0;
     const int defaultAmplitude = 0;
     const int defaultState = 0;
-    const bool defaultIsOffNoteBool = false;
     
     /* Methods */
     uint32_t u32Mix(uint32_t first, uint32_t second, uint32_t maxVal);

@@ -51,6 +51,7 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> randomAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> euclidAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> standardAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> stereoAttachment;
     
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapXAttachment;
@@ -59,9 +60,11 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment;
 
     /* Components */
-    ToggleButton randomToggleButton;  // TODO enable radio toggle buttons (see button.h) between normal, random, and euclid modes
+    ToggleButton randomToggleButton;
     ToggleButton euclidToggleButton;
     ToggleButton standardToggleButton;
+    
+    ToggleButton stereoToggleButton;
     
     Label chaosLabel;
     Slider chaosSlider;
@@ -73,9 +76,6 @@ private:
     
     Label minBeatLabel;
     Slider minBeatSlider;
-    
-    Label euclidBeatLabel;
-    Slider euclidBeatSlider;
     
     Label euclidLabel;
     

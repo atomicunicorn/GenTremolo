@@ -64,11 +64,13 @@ public:
     float getUpdatedTremFrequency(double bpm);
     int scaleChaosParameterToInt(float rawValue);
     void updateEuclidGrid();
+    void updateEuclidLeft();
+    void updateEuclidRight();
     bool onEuclidStep(int samplesPerEuclidPatternStep);
     void updateEuclidAmplitudeAndNoteLength(int volumeRampSampleLength, int samplesPer32ndNote);
     
     EuclidGrid::EuclidNote noteStruct;
-    
+    EuclidGrid::StereoEuclidNote stereoNoteStruct;
     
     
     enum BeatIndicators
@@ -94,6 +96,7 @@ public:
     bool isRandom;
     bool isEuclid;
     bool isStandard;
+    bool isStereo;
     
     int euclidX;
     int euclidY;
@@ -105,9 +108,13 @@ public:
     int minBeat;
     int maxBeat;
     bool isPlayingEuclidNote;
+    bool leftIsPlayingEuclidNote;
+    bool rightIsPlayingEuclidNote;
     int euclidStep;
     int prevEuclidStep;
     int samplesLeftInCurrentEuclidNote;
+    int leftSamplesLeftInCurrentEuclidNote;
+    int rightSamplesLeftInCurrentEuclidNote;
     
     int gridsCallCountValid;
     int euclidSampleCounter;
@@ -136,12 +143,20 @@ private:
     float volumeRampMultiplier;
     float euclidNoteAmplitude;
     
+    float leftVolumeRampMultiplier;
+    float rightVolumeRampMultiplier;
+    float leftEuclidNoteAmplitude;
+    float rightEuclidNoteAmplitude;
+    
     
     
     
     // TODO allow this to be perterbed to different lengths
     
     LinearSmoothedValue<float> euclidLinearSmoothedValue;
+    
+    LinearSmoothedValue<float> leftEuclidLinearSmoothedValue;
+    LinearSmoothedValue<float> rightEuclidLinearSmoothedValue;
     
     
     long globalNumSamplesPassed;

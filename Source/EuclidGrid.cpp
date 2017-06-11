@@ -32,7 +32,6 @@ EuclidGrid::EuclidGrid()
     euclideanLength.push_back(7);
     euclideanLength.push_back(11);
     
-    isOffNoteBool = defaultIsOffNoteBool;
     buildBeatMap();
     
 }
@@ -46,7 +45,6 @@ void EuclidGrid::resetToDefault() {
     mapY = defaultMapY;
     randomness = defaultRandomness;
     patternStep = defaultPatternStep;
-    isOffNoteBool = defaultIsOffNoteBool;
     state = defaultState;
     
     if (euclideanStep.size() == numParts && perterbation.size() == numParts && density.size() == numParts && euclideanLength.size() == numParts && amplitude.size() == numParts) {
@@ -78,16 +76,25 @@ void EuclidGrid::resetToDefault() {
 // TODO pass in the min and max beat values here to dicate return value range a bit
 /* returns the length that the input audio will be played (think of as note duration) 
  * returned value represents the number of samples the "note" lasts. */
-void EuclidGrid::runGrid(const int playHeadLocationBy32Notes, const int noteSampleLength, EuclidNote& noteStruct) {
+void EuclidGrid::runGrid(const int playHeadLocationBy32Notes, const int noteSampleLength, bool isStereo, EuclidNote& noteStruct, StereoEuclidNote& stereoNoteStruct) {
     if (playHeadLocationBy32Notes < 0) {
         resetToDefault();
         noteStruct.success = false;
         noteStruct.noteOn = false;
         noteStruct.lengthInSamples = 0;
+        stereoNoteStruct.success = false;
+        stereoNoteStruct.leftNoteOn = false;
+        stereoNoteStruct.rightNoteOn = false;
+        stereoNoteStruct.leftLengthInSamples = 0;
+        stereoNoteStruct.rightLengthInSamples = 0;
         return;
     }
     noteStruct.noteOn = false;
     noteStruct.lengthInSamples = 0;
+    stereoNoteStruct.leftNoteOn = false;
+    stereoNoteStruct.rightNoteOn = false;
+    stereoNoteStruct.leftLengthInSamples = 0;
+    stereoNoteStruct.rightLengthInSamples = 0;
     
     patternStep = playHeadLocationBy32Notes % 32;
     state = 0;
@@ -97,26 +104,53 @@ void EuclidGrid::runGrid(const int playHeadLocationBy32Notes, const int noteSamp
     for (int i = 0; i < numParts; i++) {
         euclideanStep[i] = (euclideanStep[i] + 1) % euclideanLength[i];
     }
-    
-    int noteLength = noteSampleLength;
-    if ((state & 1) > 0) {                /* originally this would trigger the kick drum */
-        noteLength += noteSampleLength;
-        noteStruct.noteOn = true;
-    }
-    if ((state & 2) > 0) {               /* originally this would trigger the snare drum */
-        noteLength = noteSampleLength;
-        noteStruct.noteOn = true;
-    }
-    if ((state & 4) > 0) {              /* originally this would trigger the high hat */
-        if (state % 2 == 0) {
-            noteLength = noteSampleLength << 2;
-        } else {
-            noteLength = noteSampleLength >> 2;
-        }
-        noteStruct.noteOn = true;
-    }
-    noteStruct.lengthInSamples = (const int)noteLength;
     noteStruct.success = true;
+    stereoNoteStruct.success = true;
+    
+    if (!isStereo) { /* MONO note generation */
+        int noteLength = noteSampleLength;
+        if ((state & 1) > 0) {                /* originally this would trigger the kick drum */
+            noteLength += noteSampleLength;
+            noteStruct.noteOn = true;
+        }
+        if ((state & 2) > 0) {               /* originally this would trigger the snare drum */
+            noteLength = noteSampleLength;
+            noteStruct.noteOn = true;
+        }
+        if ((state & 4) > 0) {              /* originally this would trigger the high hat */
+            if (state % 2 == 0) {
+                noteLength = noteSampleLength >> 2;
+            } else {
+                noteLength = noteSampleLength << 2;
+            }
+            noteStruct.noteOn = true;
+        }
+        noteStruct.lengthInSamples = noteLength; //= (const int)noteLength;
+    } else { /* STEREO note generation */
+        if ((state & 1) > 0) {              /* play both channels (KICK LOCATIONS) */
+            stereoNoteStruct.leftLengthInSamples = noteSampleLength;
+            stereoNoteStruct.rightLengthInSamples = noteSampleLength;
+            stereoNoteStruct.leftNoteOn = true;
+            stereoNoteStruct.rightNoteOn = true;
+            return;
+        }
+        if ((state & 2) > 0) {              /* play right channel (SNARE LOCATIONS) */
+            if (state % 2 == 0) {
+                stereoNoteStruct.rightLengthInSamples = noteSampleLength >> 1;
+            } else {
+                stereoNoteStruct.rightLengthInSamples = noteSampleLength << 1;
+            }
+            stereoNoteStruct.rightNoteOn = true;
+        }
+        if ((state & 4) > 0) {              /* play left channel (HH LOCATIONS) */
+            if (state % 2 == 0) {
+                stereoNoteStruct.leftLengthInSamples = noteSampleLength << 1;
+            } else {
+                stereoNoteStruct.leftLengthInSamples = noteSampleLength >> 1;
+            }
+            stereoNoteStruct.leftNoteOn = true;
+        }
+    }
 }
 
 void EuclidGrid::evaluatePattern() {
@@ -211,10 +245,6 @@ int EuclidGrid::getEuclideanLength(int index) {
     if (index < 0 || index > numParts || index >= euclideanLength.size())
         return -1;
     return euclideanLength[index];
-}
-
-bool EuclidGrid::isOffNote() {
-    return isOffNoteBool;
 }
 
 void EuclidGrid::setMapX(int x) {
