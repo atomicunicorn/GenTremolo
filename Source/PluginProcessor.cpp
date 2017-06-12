@@ -52,8 +52,10 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
     parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
-    
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    parameters.createAndAddParameter("kickDensityParamID", "Kick Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
+    parameters.createAndAddParameter("snareDensityParamID", "Snare Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
+    parameters.createAndAddParameter("hhDensityParamID", "HH Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
     parameters.createAndAddParameter("mapXParamID", "MapX", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
     parameters.createAndAddParameter("mapYParamID", "MapY", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
     // TODO use the value to text function to set the min beat label and the euclid beat label
@@ -298,6 +300,10 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
     euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
     euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")), EuclidGrid::kickIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")), EuclidGrid::snareIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")), EuclidGrid::hhIndex);
+    
     minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
     euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);
     const int chaosIntervalSize = scaleChaosParameterToInt(rawChaosParamValue);

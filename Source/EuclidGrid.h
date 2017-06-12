@@ -30,6 +30,10 @@ public:
     EuclidGrid();
     ~EuclidGrid();
     
+    static const int kickIndex = 0;
+    static const int snareIndex = 1;
+    static const int hhIndex = 2;
+    
     const int numParts = 3;
     const int stepsPerPattern = 32;
     const int numNodeElements = 96;

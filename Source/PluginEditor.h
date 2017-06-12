@@ -39,6 +39,7 @@ public:
     /* public attributes */
     const int numMinBeatTabs = 5;
     Colour tabColorRGBA = Colours::aqua;
+    Colour euclidComponentsBackgroundColor = Colours::aqua;
 
 private:
     
@@ -52,12 +53,15 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> euclidAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> standardAttachment;
     ScopedPointer<AudioProcessorValueTreeState::ButtonAttachment> stereoAttachment;
-    
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
+    
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> kickDensityAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> snareDensityAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> hhDensityAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapXAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapYAttachment;
-    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
-    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment; // TODO remove this
 
     /* Components */
     ToggleButton randomToggleButton;
@@ -68,6 +72,13 @@ private:
     
     Label chaosLabel;
     Slider chaosSlider;
+    
+    Label kickDensityLabel;
+    Slider kickDensitySlider;
+    Label snareDensityLabel;
+    Slider snareDensitySlider;
+    Label hhDensityLabel;
+    Slider hhDensitySlider;
     
     Label mapXLabel;
     Slider mapXSlider;
