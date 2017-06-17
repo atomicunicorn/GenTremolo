@@ -125,6 +125,10 @@ public:
     BeatIndicators getBeatIndicatorFromParam(float rawValue);
     int beatIndicatorToEuclidBeatDivisor(float rawValue);
     
+    //// XXX THIS MAY CAUSE THE STATIC INITIALIZATION ORDER DISASTER!!!!!
+    static const int kickIndex = 0;
+    static const int snareIndex = 1;
+    static const int hhIndex = 2;
     
 
 private:

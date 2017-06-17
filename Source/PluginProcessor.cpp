@@ -46,7 +46,18 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     // TODO use the value to text function to set the label to either on or off for automation
     parameters.createAndAddParameter("randomParamID", "Random", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, [](float value)
+                                     {
+                                         // value to text function
+                                         return value < 0.5 ? "Off" : "On";
+                                     },
+                                     [](const String& text)
+                                     {
+                                         // text to value function
+                                         if (text == "Off")    return 0.0f;
+                                         if (text == "On")  return 1.0f;
+                                         return 0.0f;
+                                     });
     parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
@@ -300,9 +311,9 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
     euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
     euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")), EuclidGrid::kickIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")), EuclidGrid::snareIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")), EuclidGrid::hhIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")), kickIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")), snareIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")), hhIndex);
     
     minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
     euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);

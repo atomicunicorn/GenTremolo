@@ -52,11 +52,11 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     /*** Chaos Slider Param ***/
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
-    chaosSlider.setSliderStyle (Slider::LinearVertical);
+    chaosSlider.setSliderStyle (Slider::SliderStyle::RotaryVerticalDrag);
     chaosSlider.setRange(0.0, 10.0, 1.0);
     chaosSlider.setChangeNotificationOnlyOnRelease(true);
-    chaosSlider.setPopupDisplayEnabled (false, this);
-    chaosSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 65, 20);
+    chaosSlider.setPopupDisplayEnabled (true, this);
+    chaosSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     addAndMakeVisible(&chaosSlider);
     chaosLabel.setText("Chaos Amount", dontSendNotification);
     chaosLabel.attachToComponent(&chaosSlider, true);
@@ -184,7 +184,7 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Gen Tremolo f", getLocalBounds(), Justification::centredTop, 1);
+    g.drawFittedText ("Gen Tremolo 0.0.1", getLocalBounds(), Justification::centredTop, 1);
 }
 
 void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
@@ -289,34 +289,26 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
 
 /* For testing purposes */
 void GenTremoloAudioProcessorEditor::timerCallback() {
-    if (processor.isEuclid) {
-        String labelText = String("b ") + String(processor.euclidBeatDivisor) + String(" s ") + String(processor.euclidStep);
-        euclidLabel.setText(labelText, dontSendNotification);
-    } else {
-        euclidLabel.setText("off", dontSendNotification);
-    }
+//    if (processor.isEuclid) {
+//        String labelText = String("b ") + String(processor.euclidBeatDivisor) + String(" s ") + String(processor.euclidStep);
+//        euclidLabel.setText(labelText, dontSendNotification);
+//    } else {
+//        euclidLabel.setText("off", dontSendNotification);
+//    }
 }
 
 void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
     
-//    waveformComboBox.setBounds(getWidth()/2 + 15, 135 + getHeight()/4, getWidth()/3, getHeight()/7);
-//    euclidLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
-    
     waveformComboBox.setBounds(getWidth()/2 + 10, getWidth()/5 - getWidth()/7, getWidth()/3, getHeight()/7);
     euclidLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
     randomToggleButton.setBounds(getWidth()/2, waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 60, getWidth()/5, getHeight()/6);
-//    euclidToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight() + 5, randomToggleButton.getWidth(), randomToggleButton.getHeight());
-//    stereoToggleButton.setBounds(euclidToggleButton.getX() + euclidToggleButton.getWidth(), euclidToggleButton.getY(), euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     standardToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight()/2 + 15, randomToggleButton.getWidth(), randomToggleButton.getHeight());
-//    waveformComboBox.setBounds(getWidth()/2 + 10, standardToggleButton.getY()+getHeight()/7, getWidth()/3, getHeight()/7);
     euclidToggleButton.setBounds(standardToggleButton.getX(), standardToggleButton.getY() + standardToggleButton.getHeight()/2 + 15, standardToggleButton.getWidth(), standardToggleButton.getHeight());
     stereoToggleButton.setBounds(euclidToggleButton.getX() + euclidToggleButton.getWidth(), euclidToggleButton.getY(), euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     
     chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
-//    mapXSlider.setBounds(chaosSlider.getRight()+chaosSlider.getWidth()/4, chaosSlider.getY(), chaosSlider.getWidth()/4, chaosSlider.getHeight());
-//    mapYSlider.setBounds(mapXSlider.getRight()+mapXSlider.getWidth()/2+5, mapXSlider.getY(), mapXSlider.getWidth(), mapXSlider.getHeight());
     minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3 - 35, chaosSlider.getBottom() + 50, 140, 20);
     minBeatSlider.setBounds(chaosSlider.getX() - getWidth()/3 + minBeatLabel.getWidth() - 35, chaosSlider.getBottom() + 50, 125, 25);
     
