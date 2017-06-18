@@ -44,20 +44,11 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     /* Initialize and add the parameters */
     
-    // TODO use the value to text function to set the label to either on or off for automation
+    // TODO fix automation text representations in host (may be just a problem with Ableton integration)
     parameters.createAndAddParameter("randomParamID", "Random", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, [](float value)
-                                     {
-                                         // value to text function
-                                         return value < 0.5 ? "Off" : "On";
-                                     },
-                                     [](const String& text)
-                                     {
-                                         // text to value function
-                                         if (text == "Off")    return 0.0f;
-                                         if (text == "On")  return 1.0f;
-                                         return 0.0f;
-                                     });
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                     [](float v) -> String { return v < 0.5f ? "Off" : "On";},
+                                     [](const String& s) -> float { if (s == "Off"){return 0.0f;} if(s =="On"){return 1.0f;}return 0.0f;} );
     parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
@@ -94,6 +85,18 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
 GenTremoloAudioProcessor::~GenTremoloAudioProcessor()
 {
     // TODO make sure that we don't need to delete the EuclidGrid object explicitly.
+}
+
+String GenTremoloAudioProcessor::toggleButtonParameterValueToString(float rawValue) {
+    return rawValue < 0.5f ? "Off" : "On";
+}
+
+float GenTremoloAudioProcessor::toggleButtonStringToParameterRawValue(String toggleButtonString) {
+    if (toggleButtonString == "Off")
+        return 0.0f;
+    if (toggleButtonString == "On");
+        return 1.0f;
+    return 0.0f;
 }
 
 //==============================================================================
@@ -304,6 +307,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     /* Read user-controlled parameters */
     const float rawChaosParamValue = *parameters.getRawParameterValue("chaosParamID");
     const float rawBeatParamValue = *parameters.getRawParameterValue("minBeatParamID");
+    const float rawMixParamValue = *parameters.getRawParameterValue("mixParamID");
     isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
     isStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
     isEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;

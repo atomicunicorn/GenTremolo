@@ -47,6 +47,8 @@ public:
     
     Colour backgroundColour = Colour(18, 44, 52);
     Colour stringColour = Colour(166, 207, 213);
+    Colour opaqueStringColour = Colour::fromFloatRGBA(166.0f, 207.0f, 213.0f, 0.2f);
+    Colour testGridColour = Colour::fromFloatRGBA(255.0f, 255.0f, 255.0f, 0.2f);
     Colour standardSectionColour = Colour(214,255,183);
     Colour tabColorRGBA = Colours::aqua;
     Colour euclidComponentsBackgroundColor = Colours::aqua;
@@ -54,13 +56,14 @@ public:
     /* component locations */
     const int toggleHeight = 20;
     
-    const int chaosSliderX = 333;
+    const int chaosSliderX = 369;
     const int chaosSliderY = 45;
     const int chaosSliderDiameter = 95;
     const int mixSliderX = 83;
     
-    const int euclidToggleX = 20;
+    const int euclidToggleX = 6;
     const int euclidToggleY = 200;
+    const int firstEuclidKnobX = 90;
     
     const int standardToggleY = 333;
     
@@ -73,9 +76,10 @@ public:
     const int togglesRight = 0;
     
     const int euclidKnobDiameter = 70;
-    const int knobXOffset = 75;
+    const int euclidKnobY = 167;
+    const int knobXOffset = 83;
     
-    const int waveformX = 340;
+    const int waveformX = 354;
     
     /* title box coords */
     const int titleBoxBottom = 20;

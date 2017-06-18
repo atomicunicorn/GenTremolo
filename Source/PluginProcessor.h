@@ -130,6 +130,9 @@ public:
     static const int snareIndex = 1;
     static const int hhIndex = 2;
     
+    static String toggleButtonParameterValueToString(float rawValue);
+    static float toggleButtonStringToParameterRawValue(String toggleButtonString);
+    
 
 private:
     /* Audio Parameters */
