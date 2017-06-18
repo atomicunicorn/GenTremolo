@@ -46,6 +46,16 @@ public:
     
     const int numMinBeatTabs = 5;
     
+    /* Below are the colour variables that will be assigned to the DadBodLookAndFeel.h declarations
+     * in the PluginEditor's constructor.                                                           */
+    Colour dadBodBackgroundColour;
+    Colour dadBodStringColour;
+    Colour dadBodOpaqueStringColour;
+    Colour dadBodHighlightColour;
+    Colour dadBodSecondaryColour;
+    Colour dadBodTestGridColour;
+    
+    /* Below are unlinked colours to the DadBodLookAndFeel.h descriptions. These are deprecated */
     Colour backgroundColour = Colour(18, 44, 52);
     Colour stringColour = Colour(166, 207, 213);
     Colour opaqueStringColour = Colour::fromFloatRGBA(166.0f, 207.0f, 213.0f, 0.2f);
@@ -77,7 +87,7 @@ public:
     const int togglesRight = 0;
     
     const int euclidKnobDiameter = 70;
-    const int euclidKnobY = 167;
+    const int euclidKnobY = 166;
     const int knobXOffset = 83;
     
     const int waveformX = 354;
@@ -108,9 +118,7 @@ public:
     const int lfoBoxY = 333;
     
     /* binary data pointers */
-    Typeface::Ptr vFontPtr;
-    
-    
+    Typeface::Ptr vFontPtr;    
 
 private:
     
@@ -166,7 +174,7 @@ private:
     Label minBeatLabel;
     Slider minBeatSlider;
     
-    Label euclidLabel;
+    Label testLabel;
     
     ComboBox waveformComboBox;
     
