@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "EuclidGrid.h"
+#include "DadBodLookAndFeel.h"
 #include <string>
 
 
@@ -106,9 +107,14 @@ public:
     const int lfoBoxBottom = 399;
     const int lfoBoxY = 333;
     
+    /* binary data pointers */
+    Typeface::Ptr vFontPtr;
+    
     
 
 private:
+    
+    DadBodLookAndFeel dadBodLookAndFeel;
     
     /* Methods */
     

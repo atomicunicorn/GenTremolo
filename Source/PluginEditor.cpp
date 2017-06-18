@@ -11,6 +11,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "EuclidGrid.h"
+#include "DadBodLookAndFeel.h"
 
 
 //==============================================================================
@@ -20,6 +21,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (windowWidth, windowHeight);
+    setLookAndFeel(&dadBodLookAndFeel);
+    vFontPtr = Typeface::createSystemTypefaceFor(BinaryData::VT323Regular_ttf, BinaryData::VT323Regular_ttfSize);
     
     euclidLabel.setText("init", dontSendNotification);
     addAndMakeVisible(&euclidLabel);
@@ -65,6 +68,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mixSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, stringColour);
     addAndMakeVisible(&mixSlider);
     mixLabel.setText("Mix", dontSendNotification);
+    mixLabel.setFont(vFontPtr);
     mixLabel.setColour(Label::ColourIds::textColourId, stringColour);
     mixLabel.setJustificationType(Justification::centredBottom);
     mixLabel.setBounds(mixLabel.getX(), 18, mixLabel.getWidth(), mixLabel.getHeight());
@@ -82,6 +86,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     chaosSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, stringColour);
     addAndMakeVisible(&chaosSlider);
     chaosLabel.setText("Chaos Amount", dontSendNotification);
+    chaosLabel.setFont(vFontPtr);
     chaosLabel.setColour(Label::ColourIds::textColourId, stringColour);
     chaosLabel.setJustificationType(Justification::centredBottom);
     chaosLabel.attachToComponent(&chaosSlider, false);
@@ -97,6 +102,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapXSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, Colours::aqua);
     addAndMakeVisible(&mapXSlider);
     mapXLabel.setText("X", dontSendNotification);
+    mapXLabel.setFont(vFontPtr);
     mapXLabel.setSize(30, 20);
     mapXLabel.attachToComponent(&mapXSlider, false);
     mapXLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
@@ -113,6 +119,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapYSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, Colours::aqua);
     addAndMakeVisible(&mapYSlider);
     mapYLabel.setText("Y", dontSendNotification);
+    mapYLabel.setFont(vFontPtr);
     mapYLabel.setSize(30, 20);
     mapYLabel.attachToComponent(&mapYSlider, false);
     mapYLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
@@ -128,6 +135,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     kickDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, Colours::aqua);
     addAndMakeVisible(&kickDensitySlider);
     kickDensityLabel.setText("kick d", dontSendNotification);
+    kickDensityLabel.setFont(vFontPtr);
     kickDensityLabel.setSize(30, 20);
     kickDensityLabel.attachToComponent(&kickDensitySlider, false);
     kickDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
@@ -143,6 +151,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     snareDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, Colours::aqua);
     addAndMakeVisible(&snareDensitySlider);
     snareDensityLabel.setText("snare d", dontSendNotification);
+    snareDensityLabel.setFont(vFontPtr);
     snareDensityLabel.setSize(30, 20);
     snareDensityLabel.attachToComponent(&snareDensitySlider, false);
     snareDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
@@ -158,6 +167,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     hhDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, Colours::aqua);
     addAndMakeVisible(&hhDensitySlider);
     hhDensityLabel.setText("hh d", dontSendNotification);
+    hhDensityLabel.setFont(vFontPtr);
     hhDensityLabel.setSize(30, 20);
     hhDensityLabel.attachToComponent(&hhDensitySlider, false);
     hhDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
@@ -172,6 +182,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&minBeatSlider);
     minBeatSlider.addListener(this);
     minBeatLabel.setText("Min beat: 1/4", dontSendNotification);
+    minBeatLabel.setFont(vFontPtr);
     minBeatLabel.setColour(Label::ColourIds::textColourId, stringColour);
     minBeatLabel.setJustificationType(Justification::centredBottom);
     minBeatLabel.attachToComponent(&minBeatSlider, false);
@@ -218,11 +229,16 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 //    g.fillAll(Colours::black);
     
     // TODO add custom font: https://fonts.google.com/specimen/VT323?selection.family=VT323
+    
     g.fillAll(backgroundColour);
 
 //    g.setColour (Colours::white);
     g.setColour(stringColour);
-    g.setFont (15.0f);
+    if (vFontPtr != nullptr) {
+        g.setFont(vFontPtr);
+//        getLookAndFeel().setDefaultSansSerifTypefaceName(vFontPtr->getName());
+    }
+    g.setFont (20.0f);
     g.drawFittedText ("Gen Tremolo 0.0.1", getLocalBounds(), Justification::topLeft, 1);
     g.drawRoundedRectangle(4.0f, topBoxTop, (float)getWidth()-8.0f, 107.0f, cornerSize, 1.0f);
     
@@ -359,7 +375,7 @@ void GenTremoloAudioProcessorEditor::timerCallback() {
 //    } else {
 //        euclidLabel.setText("off", dontSendNotification);
 //    }
-    euclidLabel.setText("y: " + String(kickDensitySlider.getY()), dontSendNotification);
+    euclidLabel.setText("n: " + String(vFontPtr->getName()), dontSendNotification);
 }
 
 void GenTremoloAudioProcessorEditor::resized() {
