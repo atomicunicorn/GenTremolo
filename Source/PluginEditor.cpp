@@ -19,13 +19,14 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (500, 400);
+    setSize (windowWidth, windowHeight);
     
     euclidLabel.setText("init", dontSendNotification);
     addAndMakeVisible(&euclidLabel);
     
     /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
+    randomToggleButton.setColour(ToggleButton::ColourIds::textColourId, standardSectionColour);
     randomToggleButton.setRadioGroupId(modeRadioGroupID);
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
@@ -38,7 +39,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidToggleButton);
     euclidToggleButton.addListener(this);
     
-    standardToggleButton.setButtonText("Standard");
+    standardToggleButton.setButtonText("LFO");
+    standardToggleButton.setColour(ToggleButton::ColourIds::textColourId, standardSectionColour);
     standardToggleButton.setRadioGroupId(modeRadioGroupID);
     standardToggleButton.setToggleState(true, dontSendNotification);
     addAndMakeVisible(&standardToggleButton);
@@ -50,6 +52,20 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&stereoToggleButton);
     stereoAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "stereoParamID", stereoToggleButton);
     
+    /*** Mix Slider Param ***/
+    mixSlider.setSliderStyle (Slider::SliderStyle::RotaryVerticalDrag);
+    mixSlider.setRange(0.0, 10.0, 1.0);
+    mixSlider.setChangeNotificationOnlyOnRelease(true);
+    mixSlider.setPopupDisplayEnabled (true, this);
+    mixSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
+    addAndMakeVisible(&mixSlider);
+    mixLabel.setText("Mix", dontSendNotification);
+    mixLabel.setColour(Label::ColourIds::textColourId, stringColour);
+    mixLabel.setJustificationType(Justification::centred);
+    mixLabel.attachToComponent(&mixSlider, false);
+    addAndMakeVisible(&mixLabel);
+    mixAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mixParamID", mixSlider);
+    
     /*** Chaos Slider Param ***/
     // TODO look at docs for NormalisableRange.snapToLegalValue. might work for discrete chaos value fix...
     chaosSlider.setSliderStyle (Slider::SliderStyle::RotaryVerticalDrag);
@@ -59,7 +75,9 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     chaosSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     addAndMakeVisible(&chaosSlider);
     chaosLabel.setText("Chaos Amount", dontSendNotification);
-    chaosLabel.attachToComponent(&chaosSlider, true);
+    chaosLabel.setColour(Label::ColourIds::textColourId, stringColour);
+    chaosLabel.setJustificationType(Justification::centred);
+    chaosLabel.attachToComponent(&chaosSlider, false);
     addAndMakeVisible(&chaosLabel);
     chaosAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "chaosParamID", chaosSlider);
     
@@ -75,7 +93,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapXLabel.setSize(30, 20);
     mapXLabel.attachToComponent(&mapXSlider, false);
     mapXLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
-    mapXSlider.setAlpha(0.2f);
+    mapXLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(&mapXLabel);
     mapXAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapXParamID", mapXSlider);
     
@@ -91,6 +109,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapYLabel.setSize(30, 20);
     mapYLabel.attachToComponent(&mapYSlider, false);
     mapYLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
+    mapYLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(&mapYLabel);
     mapYAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapYParamID", mapYSlider);
     
@@ -105,6 +124,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     kickDensityLabel.setSize(30, 20);
     kickDensityLabel.attachToComponent(&kickDensitySlider, false);
     kickDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
+    kickDensityLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(&kickDensityLabel);
     kickDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "kickDensityParamID", kickDensitySlider);
     
@@ -119,6 +139,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     snareDensityLabel.setSize(30, 20);
     snareDensityLabel.attachToComponent(&snareDensitySlider, false);
     snareDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
+    snareDensityLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(&snareDensityLabel);
     snareDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "snareDensityParamID", snareDensitySlider);
     
@@ -133,6 +154,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     hhDensityLabel.setSize(30, 20);
     hhDensityLabel.attachToComponent(&hhDensitySlider, false);
     hhDensityLabel.setColour(Label::ColourIds::textColourId, Colours::aqua);
+    hhDensityLabel.setJustificationType(Justification::centred);
     addAndMakeVisible(&hhDensityLabel);
     hhDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "hhDensityParamID",hhDensitySlider);
     
@@ -143,6 +165,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&minBeatSlider);
     minBeatSlider.addListener(this);
     minBeatLabel.setText("Min beat: 1/4", dontSendNotification);
+    minBeatLabel.setColour(Label::ColourIds::textColourId, stringColour);
     minBeatLabel.attachToComponent(&minBeatSlider, false);
     addAndMakeVisible(&minBeatLabel);
     minBeatAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "minBeatParamID", minBeatSlider);
@@ -154,6 +177,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     waveformComboBox.addItem("square", 4);
     waveformComboBox.addSeparator();
     waveformComboBox.setText("sloped-square");
+    waveformComboBox.setColour(ComboBox::ColourIds::textColourId, standardSectionColour);
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
     
@@ -180,11 +204,23 @@ GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
 void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+//    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+//    g.fillAll(Colours::black);
+    g.fillAll(backgroundColour);
 
-    g.setColour (Colours::white);
+//    g.setColour (Colours::white);
+    g.setColour(stringColour);
     g.setFont (15.0f);
     g.drawFittedText ("Gen Tremolo 0.0.1", getLocalBounds(), Justification::centredTop, 1);
+    
+    /* Euclidean controls box lines */
+    g.setColour(Colours::aqua);
+//    g.drawRoundedRectangle(float x, <#float y#>, <#float width#>, <#float height#>, <#float cornerSize#>, <#float lineThickness#>)
+    g.drawRoundedRectangle(euclidRowLeft, euclidRowTop, euclidRowRight-euclidRowLeft, euclidRowBottom - euclidRowTop, 4.0f, 1.0f);
+    float lineWidth = (float)getWidth() - 1.0f;
+    g.drawRect(1.0f, (float)titleBoxBottom, lineWidth, 2.0f); // title divider line
+    g.drawRect(1.0f, (float)topBoxBottom, lineWidth, 2.0f);   // top box divider line
+    g.drawRect(1.0f, (float)euclidBoxBottom, lineWidth, 2.0f);
 }
 
 void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
@@ -257,7 +293,8 @@ String GenTremoloAudioProcessorEditor::getGridBeatString() {
 void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
     if (button == &randomToggleButton || button == &standardToggleButton) {
         minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
-        waveformComboBox.setVisible(true);
+        randomToggleButton.setAlpha(1.0f);
+        waveformComboBox.setAlpha(1.0f);
         mapXSlider.setAlpha(0.2f);
         mapXLabel.setAlpha(0.2f);
         mapYSlider.setAlpha(0.2f);
@@ -272,7 +309,8 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
     }
     if (button == &euclidToggleButton) {
         minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
-        waveformComboBox.setVisible(false);
+        randomToggleButton.setAlpha(0.2f);
+        waveformComboBox.setAlpha(0.2f);
         mapXSlider.setAlpha(1.0f);
         mapXLabel.setAlpha(1.0f);
         mapYSlider.setAlpha(1.0f);
@@ -295,28 +333,40 @@ void GenTremoloAudioProcessorEditor::timerCallback() {
 //    } else {
 //        euclidLabel.setText("off", dontSendNotification);
 //    }
+    euclidLabel.setText("w: " + String(chaosSlider.getWidth()) + " " + String(chaosSlider.getHeight()), dontSendNotification);
 }
 
 void GenTremoloAudioProcessorEditor::resized() {
     /* This is generally where you'll want to lay out the positions of any
      * subcomponents in your editor.. */
     
-    waveformComboBox.setBounds(getWidth()/2 + 10, getWidth()/5 - getWidth()/7, getWidth()/3, getHeight()/7);
-    euclidLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
-    randomToggleButton.setBounds(getWidth()/2, waveformComboBox.getY() + waveformComboBox.getHeight()/2 + 60, getWidth()/5, getHeight()/6);
-    standardToggleButton.setBounds(randomToggleButton.getX(), randomToggleButton.getY() + randomToggleButton.getHeight()/2 + 15, randomToggleButton.getWidth(), randomToggleButton.getHeight());
-    euclidToggleButton.setBounds(standardToggleButton.getX(), standardToggleButton.getY() + standardToggleButton.getHeight()/2 + 15, standardToggleButton.getWidth(), standardToggleButton.getHeight());
-    stereoToggleButton.setBounds(euclidToggleButton.getX() + euclidToggleButton.getWidth(), euclidToggleButton.getY(), euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
+    /* Title Box */
     
-    chaosSlider.setBounds(65, 33, chaosSlider.getTextBoxWidth(), getHeight() - 150);
-    minBeatLabel.setBounds(chaosSlider.getX() - getWidth()/3 - 35, chaosSlider.getBottom() + 50, 140, 20);
-    minBeatSlider.setBounds(chaosSlider.getX() - getWidth()/3 + minBeatLabel.getWidth() - 35, chaosSlider.getBottom() + 50, 125, 25);
     
-    kickDensitySlider.setBounds(minBeatSlider.getX()+minBeatSlider.getWidth() + 5, minBeatSlider.getY(), 70, 70);
-    snareDensitySlider.setBounds(kickDensitySlider.getX() + kickDensitySlider.getWidth() + 5, kickDensitySlider.getY(), kickDensitySlider.getWidth(), kickDensitySlider.getHeight());
-    hhDensitySlider.setBounds(snareDensitySlider.getX()+snareDensitySlider.getWidth() + 5, kickDensitySlider.getY(), kickDensitySlider.getWidth(), kickDensitySlider.getHeight());
-    mapXSlider.setBounds(hhDensitySlider.getX()+hhDensitySlider.getWidth()+5, kickDensitySlider.getY(), kickDensitySlider.getWidth(), kickDensitySlider.getHeight());
-    mapYSlider.setBounds(mapXSlider.getX()+mapXSlider.getWidth()+5, kickDensitySlider.getY(), kickDensitySlider.getWidth(), kickDensitySlider.getHeight());
+    /* Top Box */
+    chaosSlider.setBounds(chaosSliderX, chaosSliderY, chaosSliderDiameter, chaosSliderDiameter);
+    mixSlider.setBounds(mixSliderX - chaosSliderDiameter/2, chaosSliderY, chaosSliderDiameter, chaosSliderDiameter);
+    
+    /* Euclid Box */
+    euclidToggleButton.setBounds(euclidToggleX, euclidToggleY - toggleHeight/2, getWidth()/6, toggleHeight);
+    stereoToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + toggleHeight + 4, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
+    
+    kickDensitySlider.setBounds(euclidToggleButton.getRight() + 20 + edgeMarginSize, euclidBoxY, euclidKnobDiameter, euclidKnobDiameter);
+    snareDensitySlider.setBounds(kickDensitySlider.getX() + knobXOffset, euclidBoxY, euclidKnobDiameter, euclidKnobDiameter);
+    hhDensitySlider.setBounds(snareDensitySlider.getX() + knobXOffset, euclidBoxY, euclidKnobDiameter, euclidKnobDiameter);
+    mapXSlider.setBounds(hhDensitySlider.getX() + knobXOffset, euclidBoxY, euclidKnobDiameter, euclidKnobDiameter);
+    mapYSlider.setBounds(mapXSlider.getX() + knobXOffset, euclidBoxY, euclidKnobDiameter, euclidKnobDiameter);
+    
+    /* LFO Box */
+    waveformComboBox.setBounds(waveformX, lfoBoxY - getHeight()/14, getWidth()/4, getHeight()/7);
+    // euclidLabel is just for testing
+    euclidLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() - waveformComboBox.getHeight()/2 - 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
+    
+    standardToggleButton.setBounds(euclidToggleX, standardToggleY - toggleHeight/2, getWidth()/5, toggleHeight);
+    randomToggleButton.setBounds(euclidToggleX, standardToggleButton.getY() + toggleHeight + 4, getWidth()/5, toggleHeight);
+    
+    minBeatLabel.setBounds(getWidth()/2 - 70, lfoBoxY, 140, 20);
+    minBeatSlider.setBounds(getWidth()/2 - minBeatSliderWidth/2, lfoBoxY, minBeatSliderWidth, minBeatSliderHeight);
 
     
     // TODO smarter or automatic resizing. Like example from Juce audio parameter tutorial

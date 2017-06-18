@@ -64,6 +64,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
     parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    parameters.createAndAddParameter("mixParamID", "Mix", String(), NormalisableRange<float> (0.0f, 1.0f), 1.0f, nullptr, nullptr);
     parameters.createAndAddParameter("kickDensityParamID", "Kick Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
     parameters.createAndAddParameter("snareDensityParamID", "Snare Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
     parameters.createAndAddParameter("hhDensityParamID", "HH Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
@@ -311,9 +312,9 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
     euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
     euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")), kickIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")), snareIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")), hhIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")*126.0f), kickIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")*126.0f), snareIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")*126.0f), hhIndex);
     
     minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
     euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);
