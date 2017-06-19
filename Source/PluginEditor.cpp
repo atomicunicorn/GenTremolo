@@ -31,7 +31,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     /* ------ Automation params and components added here ------ */
     randomToggleButton.setButtonText ("Random");
     randomToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getSecondarySectionColour());
-    randomToggleButton.setRadioGroupId(modeRadioGroupID);
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
     randomToggleButton.addListener(this);
@@ -39,6 +38,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     euclidToggleButton.setButtonText("Euclidean");
     euclidToggleButton.setRadioGroupId(modeRadioGroupID);
     euclidToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
+    euclidToggleButton.setToggleState(true, dontSendNotification);
     addAndMakeVisible(&euclidToggleButton);
     euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidToggleButton);
     euclidToggleButton.addListener(this);
@@ -46,7 +46,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     standardToggleButton.setButtonText("LFO");
     standardToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getSecondarySectionColour());
     standardToggleButton.setRadioGroupId(modeRadioGroupID);
-    standardToggleButton.setToggleState(true, dontSendNotification);
     addAndMakeVisible(&standardToggleButton);
     standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
     standardToggleButton.addListener(this);
@@ -90,7 +89,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapXSlider.setChangeNotificationOnlyOnRelease(true);
     mapXSlider.setPopupDisplayEnabled (true, this);
     mapXSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
-    mapXSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, dadBodLookAndFeel.getHighlightColour());
     addAndMakeVisible(&mapXSlider);
     mapXLabel.setText("X", dontSendNotification);
     mapXLabel.setSize(30, 20);
@@ -106,7 +104,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapYSlider.setChangeNotificationOnlyOnRelease(true);
     mapYSlider.setPopupDisplayEnabled (true, this);
     mapYSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
-    mapYSlider.setColour(Slider::ColourIds::rotarySliderFillColourId, dadBodLookAndFeel.getHighlightColour());
     addAndMakeVisible(&mapYSlider);
     mapYLabel.setText("Y", dontSendNotification);
     mapYLabel.setSize(30, 20);
@@ -168,7 +165,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&minBeatSlider);
     minBeatSlider.addListener(this);
     minBeatLabel.setText("Min beat: 1/4", dontSendNotification);
-//    minBeatLabel.setColour(Label::ColourIds::textColourId, stringColour);
     minBeatLabel.setJustificationType(Justification::centredBottom);
     minBeatLabel.attachToComponent(&minBeatSlider, false);
     addAndMakeVisible(&minBeatLabel);
@@ -181,24 +177,25 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     waveformComboBox.addItem("square", 4);
     waveformComboBox.addSeparator();
     waveformComboBox.setText("sloped-square");
-//    waveformComboBox.setColour(ComboBox::ColourIds::textColourId, standardSectionColour);
-//    waveformComboBox.setColour(ComboBox::ColourIds::outlineColourId, standardSectionColour);
-//    waveformComboBox.setColour(ComboBox::ColourIds::arrowColourId, stringColour);
     addAndMakeVisible(&waveformComboBox);
     waveformComboBox.addListener(this);
     
     startTimer(300);
-    mapXSlider.setAlpha(0.2f);
-    mapXLabel.setAlpha(0.2f);
-    mapYSlider.setAlpha(0.2f);
-    mapYLabel.setAlpha(0.2f);
-    kickDensitySlider.setAlpha(0.2f);
-    kickDensityLabel.setAlpha(0.2f);
-    snareDensitySlider.setAlpha(0.2f);
-    snareDensityLabel.setAlpha(0.2f);
-    hhDensitySlider.setAlpha(0.2f);
-    hhDensityLabel.setAlpha(0.2f);
-    stereoToggleButton.setAlpha(0.2f);
+    
+    minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+    randomToggleButton.setAlpha(0.2f);
+    waveformComboBox.setAlpha(0.2f);
+    mapXSlider.setAlpha(1.0f);
+    mapXLabel.setAlpha(1.0f);
+    mapYSlider.setAlpha(1.0f);
+    mapYLabel.setAlpha(1.0f);
+    kickDensitySlider.setAlpha(1.0f);
+    kickDensityLabel.setAlpha(1.0f);
+    snareDensitySlider.setAlpha(1.0f);
+    snareDensityLabel.setAlpha(1.0f);
+    hhDensitySlider.setAlpha(1.0f);
+    hhDensityLabel.setAlpha(1.0f);
+    stereoToggleButton.setAlpha(1.0f);
     
 }
 
@@ -216,7 +213,7 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     g.setFont(dadBodLookAndFeel.getTitleTypefacePtr());
     g.setFont(dadBodLookAndFeel.getTitleFontSize());
     g.drawFittedText ("Gen Tremolo 0.0.1", getLocalBounds(), Justification::topLeft, 1);
-    g.drawRoundedRectangle(4.0f, topBoxTop, (float)getWidth()-8.0f, 107.0f, cornerSize, 1.0f);
+    g.drawRoundedRectangle(4.0f, topBoxTop, (float)getWidth()-8.0f, 107.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
     
     g.setColour(dadBodLookAndFeel.getTestGridColour());
     
@@ -230,9 +227,12 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     
     g.setColour(dadBodLookAndFeel.getHighlightColour());
 
-    g.drawRoundedRectangle(4.0f, (float)topBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, 1.0f);
+    /* draw euclid box */
+    g.drawRoundedRectangle(4.0f, (float)topBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
     g.setColour(dadBodLookAndFeel.getSecondarySectionColour());
-    g.drawRoundedRectangle(4.0f, (float)euclidBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, 1.0f);
+    
+    /* draw LFO box */
+    g.drawRoundedRectangle(4.0f, (float)euclidBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
     float lineWidth = (float)getWidth() - 1.0f;
 
     g.setColour(dadBodLookAndFeel.getOpaqueStringColour());

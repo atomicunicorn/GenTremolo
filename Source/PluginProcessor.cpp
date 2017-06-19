@@ -34,7 +34,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     trem_waveform_indicator = kWaveformSquareSlopedEdges; //kWaveformSine;
     trem_lfo_phase = 0.0;
     isRandom = false;
-    isStandard = true;
+    isStandard = false;
     isStereo = false;
     minBeat = k64th;
     maxBeat = k2;
@@ -50,9 +50,9 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                      [](float v) -> String { return v < 0.5f ? "Off" : "On";},
                                      [](const String& s) -> float { if (s == "Off"){return 0.0f;} if(s =="On"){return 1.0f;}return 0.0f;} );
     parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("standardParamID", "Standard", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
+    parameters.createAndAddParameter("standardParamID", "Standard", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
     parameters.createAndAddParameter("mixParamID", "Mix", String(), NormalisableRange<float> (0.0f, 1.0f), 1.0f, nullptr, nullptr);
@@ -71,7 +71,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     /* EuclidGrid setup */  // TODO integrate user parameters here!
     euclidGrid = new EuclidGrid();
-    isEuclid = false;
+    isEuclid = true;
     isPlayingEuclidNote = false;
     samplesLeftInCurrentEuclidNote = 0;
     euclidBeatDivisor = 8; // default to 32nd note length
