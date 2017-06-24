@@ -50,7 +50,19 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                      [](float v) -> String { return v < 0.5f ? "Off" : "On";},
                                      [](const String& s) -> float { if (s == "Off"){return 0.0f;} if(s =="On"){return 1.0f;}return 0.0f;} );
     parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
+                                     [](float value)
+                                     {
+                                         if(value == 0.0f) return "Off";
+                                         if(value == 1.0f) return "On";
+                                         return "";
+                                     },
+                                     [](const String& text)
+                                     {
+                                         if(text == "Off") return 0.0f;
+                                         if(text == "On") return 1.0f;
+                                         return 0.0f;
+                                     });
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);

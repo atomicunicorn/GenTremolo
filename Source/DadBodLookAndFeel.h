@@ -29,6 +29,7 @@ public:
     Colour tertiarySectionColour;
     Colour componentFillColour;
     Colour componentShadowColour;
+    Colour componentIntermediateShadowColour;
     
     /* vaporwave colors */
     Colour vwBackgroundColour;
@@ -42,15 +43,27 @@ public:
     /* Typefaces and fonts */
     Typeface::Ptr bodyTypefacePtr;
     Typeface::Ptr titleTypefacePtr;
-    const float titleFontSize = 19.0f;
+    Typeface::Ptr alienBoldTypefacePtr;
+    Typeface::Ptr alienSolidBoldTypefacePtr;
+//    const float titleFontSize = 19.0f;
+    const float titleFontSize = 28.5f;
     const float maxComponentFontSize = 15.0f;
     
-    /* Other attributes */
+    /* Line widths */
     const float smallLineWidth = 0.5f;
     const float mediumLineWidth = 1.0f;
     const float largeLineWidth = 2.0f;
     const float hugeLineWidth = 3.0f;
+    
+    /* toggle sizes */
+    const int defaultToggleHeight = 28;
     const float comboBoxTickHeight = 0.5f;
+    const float tickBoxMarginSize = 3.0f;
+    
+    /* knob sizes */
+    const int mediumKnobDiameter = 70;
+    const int largeKnobDiameter = 82;
+    const int giantKnobDiameter = 95;
     
     DadBodLookAndFeel()
     {
@@ -90,6 +103,10 @@ public:
             componentShadowColour = Colour(componentFillColour);
         }
         
+//        componentIntermediateShadowColour = Colour(getMidpointColour(componentFillColour, componentShadowColour));
+        componentIntermediateShadowColour = Colour(17.0f, 0.0f, 106.0f);
+//        setIntermediateShadowColour(componentFillColour, componentShadowColour);
+        
         setColour(ResizableWindow::backgroundColourId, backgroundColour);
         setColour(Slider::ColourIds::rotarySliderFillColourId, componentFillColour);
         setColour(Slider::ColourIds::thumbColourId, highlightColour);
@@ -116,10 +133,31 @@ public:
         /* assign fonts */
         bodyTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::VT323Regular_ttf, BinaryData::VT323Regular_ttfSize);
         titleTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::VCR_OSD_MONO_1_001_ttf, BinaryData::VCR_OSD_MONO_1_001_ttfSize);
+        alienBoldTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::AlienEncountersBold_ttf, BinaryData::AlienEncountersBold_ttfSize);
+        alienSolidBoldTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::AlienEncountersSolidBold_ttf, BinaryData::AlienEncountersSolidBold_ttfSize);
         
     }
     
     /*** CUSTOM METHODS BELOW ***/
+    
+    float getMidpointFloat(float f1, float f2) {
+        return fabsf(f1 - f2)/2.0f + fminf(f1, f2);
+    }
+    
+    void setIntermediateShadowColour(Colour c1, Colour c2) {
+        const float midRed = getMidpointFloat(c1.getFloatRed(), c2.getFloatRed());
+        const float midGreen = getMidpointFloat(c1.getFloatGreen(), c2.getFloatGreen());
+        const float midBlue = getMidpointFloat(c1.getFloatBlue(), c2.getFloatBlue());
+        componentIntermediateShadowColour = Colour(midRed, midGreen, midBlue);
+    }
+    
+    Colour getMidpointColour(Colour c1, Colour c2) {
+        const float midRed = getMidpointFloat(c1.getFloatRed(), c2.getFloatRed());
+        const float midGreen = getMidpointFloat(c1.getFloatGreen(), c2.getFloatGreen());
+        const float midBlue = getMidpointFloat(c1.getFloatBlue(), c2.getFloatBlue());
+        Colour c = Colour(midRed, midGreen, midBlue);
+        return c;
+    }
     
     Colour getBackgroundColour() {
         return backgroundColour;
@@ -158,7 +196,7 @@ public:
     }
     
     Typeface::Ptr getTitleTypefacePtr() {
-        return titleTypefacePtr;
+        return alienBoldTypefacePtr;
     }
     
     /* Need to copy construct the returned value of this function. Look at how getToggleButtonFont is called. */
@@ -201,6 +239,20 @@ public:
         return f;
     }
     
+    void drawFromSVG(Graphics& g, File svgFile, int x, int y, int newWidth, int newHeight) {
+        ScopedPointer<XmlElement> svg (XmlDocument::parse(svgFile.loadFileAsString()));
+        if(svg == nullptr)
+            return;
+        
+        ScopedPointer<Drawable> drawable;
+        
+        if (svg != nullptr) {
+            drawable = Drawable::createFromSVG (*svg);
+            drawable->setTransformToFit(Rectangle<float>(x, y, newWidth, newHeight), RectanglePlacement::stretchToFit);
+            drawable->draw(g, 1.0f, drawable->getTransform());
+        }
+    }
+    
     /*** OVERRIDEN METHODS BELOW ***/
     
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
@@ -214,23 +266,41 @@ public:
         const float rw = radius * 2.0f;
         const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
         
-        // fill
-        g.setColour (findColour(Slider::ColourIds::rotarySliderFillColourId));
-        g.fillEllipse (rx, ry, rw, rw);
+        const float innerRadius = 0.66f * radius;
+        const float innerRx = centreX - innerRadius;
+        const float innerRy = centreY - innerRadius;
+        const float innerRw = innerRadius * 2.0f;
+        
+        // outter fill and gradient fill
+        const float radiiDist = radius - innerRadius;
+        const float shineSpotDistanceFromCentre = innerRadius + radiiDist/2.0f;
+        const float sqrtTwoApprox = 1.414;
+        const float shineSpotX = centreX - shineSpotDistanceFromCentre/sqrtTwoApprox;
+        const float shineSpotY = centreY - shineSpotDistanceFromCentre/sqrtTwoApprox;
+        ColourGradient shineGradient = ColourGradient(componentFillColour, shineSpotX, shineSpotY, componentShadowColour, shineSpotX + radiiDist, shineSpotY + radiiDist, true);
+        g.setFillType(FillType::FillType(shineGradient));
+        g.fillEllipse(rx, ry, rw, rw);
+        g.setFillType(FillType(findColour(Slider::ColourIds::rotarySliderFillColourId)));
         
         // outline
-        g.setColour (findColour(Slider::ColourIds::rotarySliderOutlineColourId));
+        g.setColour(findColour(Slider::ColourIds::rotarySliderOutlineColourId));
         g.drawEllipse (rx, ry, rw, rw, 1.0f);
         
         // knob pointer line
         Path p;
-        const float pointerLength = radius * 0.33f;
+        const float pointerLength = radius * 0.25f;
         const float pointerThickness = 2.0f;
         p.addRectangle (-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength);
         p.applyTransform (AffineTransform::rotation (angle).translated (centreX, centreY));
         // pointer
         g.setColour (Colours::aqua);
         g.fillPath (p);
+        
+        // inline
+        g.setColour(findColour(Slider::ColourIds::rotarySliderFillColourId));
+        g.fillEllipse(innerRx, innerRy, innerRw, innerRw);
+        g.setColour(softOutlineColour);
+        g.drawEllipse(innerRx, innerRy, innerRw, innerRw, smallLineWidth);
     }
     
     Font getTextButtonFont (TextButton &, int buttonHeight) override {
@@ -257,32 +327,84 @@ public:
         
         ignoreUnused (isEnabled, isMouseOverButton, isButtonDown);
         
-        Rectangle<float> tickBounds (x, y, w, h);
+        const float tickBoundsWidth = w - 2.0f*tickBoxMarginSize;
+        const float tickBoundsHeight = h - 2.0f*tickBoxMarginSize;
         
-        /* modification on the two lines below */
+        const float centerX = x + tickBoundsWidth/2.0f;
+        const float centerY = y + tickBoundsHeight/2.0f;
+        
+        Rectangle<float> tickBounds (x, y, tickBoundsWidth, tickBoundsHeight);
+        Rectangle<float> marginBounds(x - tickBoxMarginSize, y - tickBoxMarginSize, w, h);
+ 
+        const float outLeftX = marginBounds.getBottomLeft().x;
+        const float outTopY = marginBounds.getTopLeft().y;
+        const float outRightX = marginBounds.getRight();
+        const float outBotY = marginBounds.getBottom();
+        
+        const float inLeftX = tickBounds.getBottomLeft().x;
+        const float inTopY = tickBounds.getTopLeft().y;
+        const float inRightX = tickBounds.getRight();
+        const float inBotY = tickBounds.getBottom();
+        
+        Point<float> centerPoint = Point<float>(centerX, centerY);
+        Path topTriangle;
+        topTriangle.addTriangle(centerPoint, marginBounds.getTopLeft(), marginBounds.getTopRight());
+        Path rightTriangle;
+        rightTriangle.addTriangle(centerPoint, marginBounds.getTopRight(), marginBounds.getBottomRight());
+        Path bottomTriangle;
+        bottomTriangle.addTriangle(centerPoint, marginBounds.getBottomLeft(), marginBounds.getBottomRight());
+        Path leftTriangle;
+        leftTriangle.addTriangle(centerPoint, marginBounds.getBottomLeft(), marginBounds.getTopLeft());
+        
+        g.setColour(componentShadowColour);
+        g.fillRect(marginBounds);
         g.setColour(componentFillColour);
-        g.fillRoundedRectangle(tickBounds, 4.0f);
-        /* end of modification */
+        g.fillRect(tickBounds);
         
+        g.fillPath(rightTriangle);
+        
+        g.setColour(componentIntermediateShadowColour);
+        g.fillPath(topTriangle);
+        g.fillPath(bottomTriangle);
+        
+        g.setColour(componentFillColour);
+        g.fillRect(tickBounds);
         g.setColour (component.findColour (ToggleButton::tickDisabledColourId));
         
-        /* modified line thickness here */
-        g.drawRoundedRectangle (tickBounds, 4.0f, 1.0f);
-        
+        /* when on, fill with radial gradient from orange to red. */
         if (ticked)
         {
-            g.setColour (component.findColour (ToggleButton::tickColourId));
-            const auto tick = getTickShape (0.75f);
-            g.fillPath (tick, tick.getTransformToScaleToFit (tickBounds.reduced (4, 5).toFloat(), false));
+//            ColourGradient onGradient = ColourGradient(stringColour, centerX, centerY, opaqueStringColour, x, y, true);
+            ColourGradient onGradient = ColourGradient(stringColour, centerX, centerY, componentFillColour, x, y, true);
+            g.setFillType(FillType::FillType(onGradient));
+            g.fillRect(tickBounds);
+            g.setFillType(FillType(findColour(Slider::ColourIds::rotarySliderFillColourId)));
         }
+        Colour opaqueBlack = Colours::black.withAlpha(0.4f);
+        g.setColour(Colours::black);
+        g.drawRect (tickBounds);
+        g.setColour(softOutlineColour);
+        g.drawRect(marginBounds, 1.0f);
+       
+        g.setColour(opaqueBlack);
+        g.drawLine(outLeftX, outTopY, inLeftX, inTopY, smallLineWidth);
+        g.drawLine(outLeftX, outBotY, inLeftX, inBotY, smallLineWidth);
+        g.setColour(softOutlineColour);
+        g.drawLine(outRightX, outTopY, inRightX, inTopY, smallLineWidth);
+        g.drawLine(outRightX, outBotY, inRightX, inBotY, smallLineWidth);
+        
         
     }
     
     void drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown) override {
         const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
-        const auto tickWidth = fontSize * 1.1f;
+        const auto tickWidth = fontSize * 1.1f + 2.0f*tickBoxMarginSize;
         
         Font font (getToggleButtonFont(button, button.getHeight()));
+        
+        const int x = 4;
+        const int y = (int)((button.getHeight() - tickWidth) * 0.5f);
+//        const int totalWidth = ;
         
         drawTickBox (g, button, 4.0f, (button.getHeight() - tickWidth) * 0.5f,
                      tickWidth, tickWidth,
@@ -299,8 +421,9 @@ public:
         
         const auto textX = roundToInt (tickWidth) + 10;
         
-        g.drawFittedText (button.getButtonText(), textX, 0, button.getWidth() - textX - 2, button.getHeight(),
-                          Justification::centredLeft, 10);
+//        Rectangle<int> textRect = Rectangle<int>(x, y, );
+        
+        g.drawFittedText (button.getButtonText(), textX, 0, button.getWidth() - textX - 2, button.getHeight(), Justification::centredLeft, 10);
     }
     
     void drawComboBox (Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box) override {

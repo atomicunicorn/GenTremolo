@@ -14,11 +14,17 @@ namespace BinaryData
     extern const char*   VT323Regular_ttf;
     const int            VT323Regular_ttfSize = 153116;
 
+    extern const char*   AlienEncountersBold_ttf;
+    const int            AlienEncountersBold_ttfSize = 20140;
+
+    extern const char*   AlienEncountersSolidBold_ttf;
+    const int            AlienEncountersSolidBold_ttfSize = 17920;
+
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 2;
+    const int namedResourceListSize = 4;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

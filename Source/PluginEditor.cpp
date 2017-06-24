@@ -206,33 +206,41 @@ GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
 //==============================================================================
 void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    
+    // TODO fill this out and get it working
+    //dadBodLookAndFeel.drawFromSVG(g, File svgFile, int x, int y, int newWidth, int newHeight)
 
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
     g.setFont(dadBodLookAndFeel.getTitleTypefacePtr());
     g.setFont(dadBodLookAndFeel.getTitleFontSize());
-    g.drawFittedText ("Gen Tremolo 0.0.1", getLocalBounds(), Justification::topLeft, 1);
-    g.drawRoundedRectangle(4.0f, topBoxTop, (float)getWidth()-8.0f, 107.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
-    
-    g.setColour(dadBodLookAndFeel.getTestGridColour());
+    Rectangle<int> topBoxArea = Rectangle<int>(6, 6, getWidth() - 12, 133);
+    Rectangle<int> titleShadowArea = Rectangle<int>(4, 7, getWidth() - 12, 133);
+//    g.drawFittedText("Gen Tremolo 0.0.1", getLocalBounds(), Justification::centredTop, 1);
+    g.setColour(dadBodLookAndFeel.getHighlightColour());
+    g.drawFittedText("Gen Tremolo 0.0.1", titleShadowArea, Justification::centredTop, 1);
+    g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
+    g.drawFittedText("Gen Tremolo 0.0.1", topBoxArea, Justification::centredTop, 1);
     
     /* the drawn lines here is purely for testing alignment and should be removed for public releases. */
+    g.setColour(dadBodLookAndFeel.getTestGridColour());
     for (int i = 1; i < 6; i++) {
         g.drawLine(((float)getWidth())/6.0f*((float) i), 1.0f, ((float)getWidth())/6.0f*((float) i), 399.0f);
     }
+    g.drawLine(4.0f, ((float)getHeight())/6.0f, ((float)getWidth())-4.0f, ((float)getHeight())/6.0f);
     g.drawLine(4.0f, ((float)getHeight())/2.0f, ((float)getWidth())-4.0f, ((float)getHeight())/2.0f); // for alignment testing
     g.drawLine(4.0f, ((float)getHeight())/6.0f*5.0f, ((float)getWidth())-4.0f, ((float)getHeight())/6.0f*5.0f); // for alignment testing
     /* end test line drawing */
     
-    g.setColour(dadBodLookAndFeel.getHighlightColour());
-
+    /* draw top box */
+    g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
+    g.drawRoundedRectangle(6.0f, 6.0f, (float)getWidth()-12.0f, 127.0f, cornerSize, dadBodLookAndFeel.mediumLineWidth);
     /* draw euclid box */
-    g.drawRoundedRectangle(4.0f, (float)topBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
-    g.setColour(dadBodLookAndFeel.getSecondarySectionColour());
-    
+    g.setColour(dadBodLookAndFeel.getHighlightColour());
+    g.drawRoundedRectangle(4.0f, 4.0f, (float)getWidth() - 8.0f, 263.0f, cornerSize, dadBodLookAndFeel.mediumLineWidth);
     /* draw LFO box */
-    g.drawRoundedRectangle(4.0f, (float)euclidBoxBottom, (float)getWidth() - 8.0f, 129.0f, cornerSize, dadBodLookAndFeel.smallLineWidth);
+    g.setColour(dadBodLookAndFeel.getSecondarySectionColour());
+    g.drawRoundedRectangle(2.0f, 2.0f, (float)getWidth() - 4.0f, 396.0f, cornerSize, dadBodLookAndFeel.mediumLineWidth);
     float lineWidth = (float)getWidth() - 1.0f;
 
     g.setColour(dadBodLookAndFeel.getOpaqueStringColour());
@@ -359,11 +367,12 @@ void GenTremoloAudioProcessorEditor::resized() {
      * subcomponents in your editor.. */
     
     /*** Top Box ***/
-    chaosSlider.setBounds(chaosSliderX, chaosSliderY - chaosSliderDiameter/6 + 4, chaosSliderDiameter, chaosSliderDiameter);
-    mixSlider.setBounds(mixSliderX - chaosSliderDiameter/2, chaosSliderY - chaosSliderDiameter/6 + 4, chaosSliderDiameter, chaosSliderDiameter);
+//    chaosSlider.setBounds(chaosSliderX, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
+    chaosSlider.setBounds(getWidth()/6*5 - euclidKnobDiameter/2, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
+    mixSlider.setBounds(getWidth()/6 - euclidKnobDiameter/2, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
     
     /*** Euclid Box ***/
-    euclidToggleButton.setBounds(euclidToggleX, euclidToggleY - toggleHeight - 2, getWidth()/6, toggleHeight);
+    euclidToggleButton.setBounds(euclidToggleX, euclidToggleY - toggleHeight + 1, getWidth()/6, toggleHeight);
     stereoToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + toggleHeight + 4, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     kickDensitySlider.setBounds(firstEuclidKnobX, euclidKnobY, euclidKnobDiameter, euclidKnobDiameter);
     snareDensitySlider.setBounds(kickDensitySlider.getX() + knobXOffset, euclidKnobY, euclidKnobDiameter, euclidKnobDiameter);
@@ -373,10 +382,9 @@ void GenTremoloAudioProcessorEditor::resized() {
     
     /*** LFO Box ***/
     waveformComboBox.setBounds(waveformX, lfoBoxY - getHeight()/14, getWidth()/4, getHeight()/7);
-    // euclidLabel is just for testing
     testLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() - waveformComboBox.getHeight()/2 - 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
     
-    standardToggleButton.setBounds(euclidToggleX, standardToggleY - toggleHeight - 2, getWidth()/5, toggleHeight);
+    standardToggleButton.setBounds(euclidToggleX, standardToggleY - toggleHeight + 1, getWidth()/5, toggleHeight);
     randomToggleButton.setBounds(euclidToggleX, standardToggleButton.getY() + toggleHeight + 4, getWidth()/5, toggleHeight);
     
     minBeatLabel.setBounds(getWidth()/2 - 70, lfoBoxY - 10, 140, 20);

@@ -41,7 +41,8 @@ public:
     const int windowWidth = 500;
     const int windowHeight = 400;
     
-    const float cornerSize = 4.0f;
+//    const float cornerSize = 4.0f;
+    const float cornerSize = 3.0f;
     const int edgeMarginSize = 4;
     
     const int numMinBeatTabs = 5;
@@ -65,7 +66,8 @@ public:
     Colour euclidComponentsBackgroundColor = Colours::aqua;
     
     /* component locations */
-    const int toggleHeight = 20;
+//    const int toggleHeight = 20;
+    const int toggleHeight = 28;
     
     const int chaosSliderX = 369;
     const int chaosSliderY = 45;
@@ -118,11 +120,15 @@ public:
     const int lfoBoxY = 333;
     
     /* binary data pointers */
-    Typeface::Ptr vFontPtr;    
+    Typeface::Ptr vFontPtr;
+    
+    const int numBackgroundDots = 2000;
 
 private:
     
     DadBodLookAndFeel dadBodLookAndFeel;
+    
+    Drawable* svgDrawable;
     
     /* Methods */
     
