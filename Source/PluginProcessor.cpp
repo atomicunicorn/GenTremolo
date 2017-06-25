@@ -316,25 +316,6 @@ int GenTremoloAudioProcessor::getEuclidNoteSampleLength(int samplesPerQuarterNot
 
 void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    /* Read user-controlled parameters */
-    const float rawChaosParamValue = *parameters.getRawParameterValue("chaosParamID");
-    const float rawBeatParamValue = *parameters.getRawParameterValue("minBeatParamID");
-    const float rawMixParamValue = *parameters.getRawParameterValue("mixParamID");
-    isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
-    isStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
-    isEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
-    isStereo = *parameters.getRawParameterValue("stereoParamID") < 0.5f ? false : true;
-    
-    euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
-    euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
-    euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")*126.0f), kickIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")*126.0f), snareIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")*126.0f), hhIndex);
-    
-    minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
-    euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);
-    const int chaosIntervalSize = scaleChaosParameterToInt(rawChaosParamValue);
     
     /* Get sample and channel information */
     const double sampleRate = getSampleRate();
@@ -375,6 +356,24 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
             
             /***** iterate through and process samples in block *****/
             for (int i = 0; i < numSamples; i++) {
+                /* Read user-controlled parameters */
+                const float rawChaosParamValue = *parameters.getRawParameterValue("chaosParamID");
+                const float rawBeatParamValue = *parameters.getRawParameterValue("minBeatParamID");
+                euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
+                euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
+                euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
+                euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")*126.0f), kickIndex);
+                euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")*126.0f), snareIndex);
+                euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")*126.0f), hhIndex);
+                minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
+                euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);
+                const int chaosIntervalSize = scaleChaosParameterToInt(rawChaosParamValue);
+                
+                isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
+                isStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
+                isEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
+                isStereo = *parameters.getRawParameterValue("stereoParamID") < 0.5f ? false : true;
+                const float rawMixParamValue = *parameters.getRawParameterValue("mixParamID");
                 
                 const float inLeft = channelDataLeft[i];
                 const float inRight = channelDataRight[i];

@@ -63,6 +63,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mixSlider.setRange(0.0, 10.0, 1.0);
     mixSlider.setChangeNotificationOnlyOnRelease(true);
     mixSlider.setPopupDisplayEnabled (true, this);
+    mixSlider.setChangeNotificationOnlyOnRelease(false);
     mixSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     addAndMakeVisible(&mixSlider);
     mixLabel.setText("Mix", dontSendNotification);
