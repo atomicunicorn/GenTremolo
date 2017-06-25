@@ -68,6 +68,9 @@ public:
     const int mediumKnobDiameter = 70;
     const int largeKnobDiameter = 82;
     const int giantKnobDiameter = 95;
+    const float lightArcMargin = 1.0f;
+    const float innerLightArcMargin = 1.0f;
+    const float lightArcThickness = 0.8f;
     
     /* margin sizes */
     const float smallMarginSize = tickBoxMarginSize;
@@ -137,8 +140,8 @@ public:
         setColour(Slider::ColourIds::textBoxBackgroundColourId, componentFillColour);
         setColour(Slider::ColourIds::trackColourId , componentFillColour);
         setColour(TextButton::ColourIds::buttonColourId, componentFillColour);
-        setColour(TextButton::ColourIds::textColourOffId, highlightColour);
-        setColour(TextButton::ColourIds::textColourOnId, highlightColour);
+        setColour(TextButton::ColourIds::textColourOffId, stringColour);
+        setColour(TextButton::ColourIds::textColourOnId, componentFillColour);
         
         /* assign fonts */
         bodyTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::VT323Regular_ttf, BinaryData::VT323Regular_ttfSize);
@@ -249,32 +252,6 @@ public:
         return f;
     }
     
-//    void drawBackgroundSVG(Graphics& g, int x, int y, int newWidth, int newHeight) {
-//        ScopedPointer<XmlElement> svg (XmlDocument::parse(BinaryData::hexmap_half_inch_svg));
-//        if (svg == nullptr) {
-//            return;
-//        }
-//        Drawable* d = Drawable::createFromSVG(*svg);
-//        addAndMakeVisible(&d);
-//    }
-//    
-    void drawFromSVG(Graphics& g, File svgFile, int x, int y, int newWidth, int newHeight) {
-        ScopedPointer<XmlElement> svg (XmlDocument::parse(svgFile.loadFileAsString()));
-        if (svg == nullptr) {
-            return;
-        }
-        
-        ScopedPointer<Drawable> drawable;
-        
-        if (svg != nullptr) {
-            drawable = Drawable::createFromSVG (*svg);
-            if (drawable != nullptr) {
-                drawable->setTransformToFit(Rectangle<float>(x, y, newWidth, newHeight), RectanglePlacement::stretchToFit);
-                drawable->draw(g, 1.0f, AffineTransform());
-            }
-        }
-    }
-    
     /*** OVERRIDEN METHODS BELOW ***/
     
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
@@ -308,7 +285,7 @@ public:
         g.setColour(findColour(Slider::ColourIds::rotarySliderOutlineColourId));
         g.drawEllipse (rx, ry, rw, rw, 1.0f);
         
-        // knob pointer line
+        // knob pointer line and outer arc level
         Path p;
         const float pointerLength = radius * 0.25f;
         const float pointerThickness = 2.0f;
@@ -317,6 +294,24 @@ public:
         // pointer
         g.setColour (Colours::aqua);
         g.fillPath (p);
+        
+        float arcWidth = (radius+lightArcMargin)*2.0f;
+        Path arcPath1;
+        arcPath1.addArc(rx - lightArcMargin, ry - lightArcMargin, arcWidth, arcWidth, rotaryStartAngle, angle, true);
+        g.setColour(secondarySectionColour.withAlpha(0.7f));
+        g.strokePath(arcPath1, PathStrokeType(lightArcThickness));
+        
+        arcWidth = (radius+lightArcMargin+innerLightArcMargin)*2.0f;
+        Path arcPath2;
+        arcPath2.addArc(rx - lightArcMargin - innerLightArcMargin, ry - lightArcMargin - innerLightArcMargin, arcWidth, arcWidth, rotaryStartAngle, angle, true);
+        g.setColour(highlightColour.withAlpha(0.7f));
+        g.strokePath(arcPath2, PathStrokeType(lightArcThickness));
+        
+        arcWidth = (radius+lightArcMargin+innerLightArcMargin*2.0f)*2.0f;
+        Path arcPath3;
+        arcPath3.addArc(rx - lightArcMargin - innerLightArcMargin*2.0f, ry - lightArcMargin - innerLightArcMargin*2.0f, arcWidth, arcWidth, rotaryStartAngle, angle, true);
+        g.setColour(stringColour.withAlpha(0.7f));
+        g.strokePath(arcPath3, PathStrokeType(lightArcThickness));
         
         // inline
         g.setColour(findColour(Slider::ColourIds::rotarySliderFillColourId));
@@ -328,7 +323,6 @@ public:
     Font getTextButtonFont (TextButton &, int buttonHeight) override {
         const float fontHeight = jmin(20.0f, buttonHeight * 0.6f);
         Font f = Font(bodyTypefacePtr);
-//        f.setHeightWithoutChangingWidth(fontHeight);
         f.setHeight(fontHeight);
         return f;
     }
@@ -354,7 +348,6 @@ public:
         Point<float> centerPoint = Point<float>(centerX, centerY);
         
         /* paths */
-        
         Path topTrapezoid;
         topTrapezoid.addTriangle(innerBounds.getTopLeft(), bounds.getTopLeft(), Point<float>(innerBounds.getTopLeft().x, bounds.getTopLeft().y));
         topTrapezoid.addRectangle(innerBounds.getTopLeft().x, bounds.getTopLeft().y, innerBounds.getWidth(), mediumMarginSize);
@@ -394,22 +387,20 @@ public:
             g.strokePath (path, PathStrokeType (1.0f));
         } else {
             
-            g.setColour(componentIntermediateShadowColour);
+            g.setColour(componentFillColour.brighter());
             g.fillRect(bounds);
             g.setColour(baseColour);
             
             g.setColour(componentIntermediateShadowColour);
-//            g.fillPath(topTrapezoid);
-//            g.fillPath(bottomTrapezoid);
-            g.setColour(componentShadowColour.darker());
             g.fillPath(topTrapezoid);
             g.fillPath(bottomTrapezoid);
-//            g.fillPath(leftTrapezoid);
+            g.setColour(componentShadowColour.darker());
+            g.fillPath(leftTrapezoid);
             
             g.setColour(baseColour);
+            
             if (button.getToggleState()) {
-//                ColourGradient onGradient = ColourGradient(stringColour, centerPoint, componentFillColour, innerBounds.getTopLeft(), true);
-                ColourGradient onGradient = ColourGradient(stringColour.withAlpha(0.6f), centerPoint, componentFillColour,
+                ColourGradient onGradient = ColourGradient(stringColour, centerPoint, componentFillColour,
                                                            Point<float>(innerBounds.getRight(),centerPoint.getY()), true);
                 g.setFillType(FillType::FillType(onGradient));
                 g.fillRect(innerBounds);
@@ -418,18 +409,12 @@ public:
             } else {
                 g.fillRect(innerBounds);
             }
-            g.setColour(Colours::black.withAlpha(0.4f));
-//            g.drawRect(innerBounds);
             
-//            g.setColour (button.findColour(ComboBox::outlineColourId));
-            g.setColour(highlightColour.withAlpha(0.4f).brighter());
+//            g.setColour(highlightColour.withAlpha(0.4f).brighter());
+            g.setColour(softOutlineColour);
             g.drawRect (bounds, 1.0f);
+            g.setColour(Colours::black);
             g.drawRect(innerBounds);
-            
-            g.drawLine(bounds.getTopLeft().x, bounds.getTopLeft().y, innerBounds.getTopLeft().x, innerBounds.getTopLeft().y);
-            g.drawLine(bounds.getTopRight().x, bounds.getTopRight().y, innerBounds.getTopRight().x, innerBounds.getTopRight().y);
-            g.drawLine(bounds.getBottomLeft().x, bounds.getBottomLeft().y, innerBounds.getBottomLeft().x, innerBounds.getBottomLeft().y);
-            g.drawLine(bounds.getBottomRight().x, bounds.getBottomRight().y, innerBounds.getBottomRight().x, innerBounds.getBottomRight().y);
         }
     }
     
@@ -469,16 +454,21 @@ public:
         
         g.setColour(componentShadowColour);
         g.fillRect(marginBounds);
-        g.setColour(componentFillColour);
-        g.fillRect(tickBounds);
         
+        g.setColour(componentFillColour.brighter());
         g.fillPath(rightTriangle);
         
         g.setColour(componentIntermediateShadowColour);
         g.fillPath(topTriangle);
         g.fillPath(bottomTriangle);
+        g.setColour(componentShadowColour);
+        g.fillPath(leftTriangle);
         
-        g.setColour(componentFillColour);
+        if (isButtonDown || isMouseOverButton) {
+            g.setColour(componentFillColour.brighter());
+        } else {
+            g.setColour(componentFillColour);
+        }
         g.fillRect(tickBounds);
         g.setColour (component.findColour (ToggleButton::tickDisabledColourId));
         

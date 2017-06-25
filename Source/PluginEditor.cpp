@@ -97,7 +97,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapXLabel.setText("X", dontSendNotification);
     mapXLabel.setSize(30, 20);
     mapXLabel.attachToComponent(&mapXSlider, false);
-    mapXLabel.setColour(Label::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
     mapXLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(&mapXLabel);
     mapXAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapXParamID", mapXSlider);
@@ -112,7 +111,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     mapYLabel.setText("Y", dontSendNotification);
     mapYLabel.setSize(30, 20);
     mapYLabel.attachToComponent(&mapYSlider, false);
-    mapYLabel.setColour(Label::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
     mapYLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(&mapYLabel);
     mapYAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "mapYParamID", mapYSlider);
@@ -127,7 +125,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     kickDensityLabel.setText("kick d", dontSendNotification);
     kickDensityLabel.setSize(30, 20);
     kickDensityLabel.attachToComponent(&kickDensitySlider, false);
-    kickDensityLabel.setColour(Label::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
     kickDensityLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(&kickDensityLabel);
     kickDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "kickDensityParamID", kickDensitySlider);
@@ -142,7 +139,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     snareDensityLabel.setText("snare d", dontSendNotification);
     snareDensityLabel.setSize(30, 20);
     snareDensityLabel.attachToComponent(&snareDensitySlider, false);
-    snareDensityLabel.setColour(Label::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
     snareDensityLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(&snareDensityLabel);
     snareDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "snareDensityParamID", snareDensitySlider);
@@ -157,7 +153,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     hhDensityLabel.setText("hh d", dontSendNotification);
     hhDensityLabel.setSize(30, 20);
     hhDensityLabel.attachToComponent(&hhDensitySlider, false);
-    hhDensityLabel.setColour(Label::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
     hhDensityLabel.setJustificationType(Justification::centredBottom);
     addAndMakeVisible(&hhDensityLabel);
     hhDensityAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "hhDensityParamID",hhDensitySlider);
