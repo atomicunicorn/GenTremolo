@@ -9,4 +9,4 @@ GenTremolo is a tremolo audio effect which has three modes.
 
 (3) Euclidean: Rythmically-synced tremolo that generatively oscillates incoming audio between on and off by following a euclidean rythm generator.
 
-<img width="499" alt="screen shot 2017-06-18 at 7 45 32 pm" src="https://user-images.githubusercontent.com/4951117/27267641-c75763fa-545e-11e7-8b38-74250ff6377e.png">
+<img width="502" alt="screen shot 2017-06-24 at 7 08 21 pm" src="https://user-images.githubusercontent.com/4951117/27513173-df626fc4-5910-11e7-9afd-3723f496b96d.png">
