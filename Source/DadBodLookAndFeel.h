@@ -40,6 +40,9 @@ public:
     Colour vwComponentFillColour;
     Colour vwComponentShadowColour;
     
+    /* svg files */
+    String svgFilePath = "/Users/zig/git_stuff/GenTremolo/hexmap_half_inch.svg";
+    
     /* Typefaces and fonts */
     Typeface::Ptr bodyTypefacePtr;
     Typeface::Ptr titleTypefacePtr;
@@ -48,6 +51,7 @@ public:
 //    const float titleFontSize = 19.0f;
     const float titleFontSize = 28.5f;
     const float maxComponentFontSize = 15.0f;
+    const float textButtonFontSize = 20.0f;
     
     /* Line widths */
     const float smallLineWidth = 0.5f;
@@ -65,6 +69,11 @@ public:
     const int largeKnobDiameter = 82;
     const int giantKnobDiameter = 95;
     
+    /* margin sizes */
+    const float smallMarginSize = tickBoxMarginSize;
+    const float mediumMarginSize = 2.0f*tickBoxMarginSize;
+    const float largeMarginSize = 2.0f*mediumMarginSize;
+    
     DadBodLookAndFeel()
     {
         /* change this to switch between vapor wave and beta colors */
@@ -77,6 +86,7 @@ public:
         
         /* vaporwave colors -- based on the color scheme of: http://imgur.com/JGhcvtF */
         vwBackgroundColour = Colour(10.0f,9.0f,44.0f); // dark navy
+//        vwBackgroundColour = Colours::white;
         vwStringColour = Colours::aqua; // light blue
         vwHighlightColour = Colour(251.0f,31.0f,254.0f); // neon pink
         vwSecondarySectionColour = Colour(246.0f, 81.0f, 29.0f);  // orange
@@ -127,8 +137,8 @@ public:
         setColour(Slider::ColourIds::textBoxBackgroundColourId, componentFillColour);
         setColour(Slider::ColourIds::trackColourId , componentFillColour);
         setColour(TextButton::ColourIds::buttonColourId, componentFillColour);
-        setColour(TextButton::ColourIds::textColourOffId, stringColour);
-        setColour(TextButton::ColourIds::textColourOnId, stringColour);
+        setColour(TextButton::ColourIds::textColourOffId, highlightColour);
+        setColour(TextButton::ColourIds::textColourOnId, highlightColour);
         
         /* assign fonts */
         bodyTypefacePtr = Typeface::createSystemTypefaceFor(BinaryData::VT323Regular_ttf, BinaryData::VT323Regular_ttfSize);
@@ -239,17 +249,29 @@ public:
         return f;
     }
     
+//    void drawBackgroundSVG(Graphics& g, int x, int y, int newWidth, int newHeight) {
+//        ScopedPointer<XmlElement> svg (XmlDocument::parse(BinaryData::hexmap_half_inch_svg));
+//        if (svg == nullptr) {
+//            return;
+//        }
+//        Drawable* d = Drawable::createFromSVG(*svg);
+//        addAndMakeVisible(&d);
+//    }
+//    
     void drawFromSVG(Graphics& g, File svgFile, int x, int y, int newWidth, int newHeight) {
         ScopedPointer<XmlElement> svg (XmlDocument::parse(svgFile.loadFileAsString()));
-        if(svg == nullptr)
+        if (svg == nullptr) {
             return;
+        }
         
         ScopedPointer<Drawable> drawable;
         
         if (svg != nullptr) {
             drawable = Drawable::createFromSVG (*svg);
-            drawable->setTransformToFit(Rectangle<float>(x, y, newWidth, newHeight), RectanglePlacement::stretchToFit);
-            drawable->draw(g, 1.0f, drawable->getTransform());
+            if (drawable != nullptr) {
+                drawable->setTransformToFit(Rectangle<float>(x, y, newWidth, newHeight), RectanglePlacement::stretchToFit);
+                drawable->draw(g, 1.0f, AffineTransform());
+            }
         }
     }
     
@@ -304,9 +326,10 @@ public:
     }
     
     Font getTextButtonFont (TextButton &, int buttonHeight) override {
-        const float fontHeight = jmin(15.0f, buttonHeight * 0.6f);
+        const float fontHeight = jmin(20.0f, buttonHeight * 0.6f);
         Font f = Font(bodyTypefacePtr);
-        f.setHeightWithoutChangingWidth(fontHeight);
+//        f.setHeightWithoutChangingWidth(fontHeight);
+        f.setHeight(fontHeight);
         return f;
     }
     
@@ -320,6 +343,94 @@ public:
     
     Typeface::Ptr getTypefaceForFont (const Font &) override {
         return bodyTypefacePtr;
+    }
+    
+    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) override {
+        const auto cornerSize = 6.0f;
+        const auto bounds = button.getLocalBounds().toFloat().reduced (0.5f, 0.5f);
+        const auto innerBounds = button.getLocalBounds().toFloat().reduced(mediumMarginSize, mediumMarginSize);
+        const float centerX = bounds.getCentreX();
+        const float centerY = bounds.getCentreY();
+        Point<float> centerPoint = Point<float>(centerX, centerY);
+        
+        /* paths */
+        
+        Path topTrapezoid;
+        topTrapezoid.addTriangle(innerBounds.getTopLeft(), bounds.getTopLeft(), Point<float>(innerBounds.getTopLeft().x, bounds.getTopLeft().y));
+        topTrapezoid.addRectangle(innerBounds.getTopLeft().x, bounds.getTopLeft().y, innerBounds.getWidth(), mediumMarginSize);
+        topTrapezoid.addTriangle(innerBounds.getTopRight(), bounds.getTopRight(), Point<float>(innerBounds.getTopRight().x, bounds.getTopRight().y));
+        Path bottomTrapezoid;
+        bottomTrapezoid.addTriangle(innerBounds.getBottomRight(), bounds.getBottomRight(), Point<float>(innerBounds.getBottomRight().x, bounds.getBottomRight().y));
+        bottomTrapezoid.addTriangle(innerBounds.getBottomLeft(), bounds.getBottomLeft(), Point<float>(innerBounds.getBottomLeft().x, bounds.getBottomLeft().y));
+        bottomTrapezoid.addRectangle(innerBounds.getBottomLeft().x, innerBounds.getBottomLeft().y, innerBounds.getWidth(), mediumMarginSize);
+        Path leftTrapezoid;
+        leftTrapezoid.addTriangle(innerBounds.getBottomLeft(), bounds.getBottomLeft(), Point<float>(bounds.getBottomLeft().x, innerBounds.getBottomLeft().y));
+        leftTrapezoid.addTriangle(innerBounds.getTopLeft(), bounds.getTopLeft(), Point<float>(bounds.getTopLeft().x,innerBounds.getTopLeft().y));
+        leftTrapezoid.addRectangle(bounds.getTopLeft().x, innerBounds.getTopLeft().y, mediumMarginSize, innerBounds.getHeight());
+        
+        
+        auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+        .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f);
+        
+        if (isButtonDown || isMouseOverButton) {
+            baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.05f);
+        }
+        
+        g.setColour (baseColour);
+        
+        if (button.isConnectedOnLeft() || button.isConnectedOnRight()) {
+            Path path;
+            path.addRoundedRectangle (bounds.getX(), bounds.getY(),
+                                      bounds.getWidth(), bounds.getHeight(),
+                                      cornerSize, cornerSize,
+                                      ! button.isConnectedOnLeft(),
+                                      ! button.isConnectedOnRight(),
+                                      ! button.isConnectedOnLeft(),
+                                      ! button.isConnectedOnRight());
+            
+            g.fillPath (path);
+            
+            g.setColour (button.findColour (ComboBox::outlineColourId));
+            g.strokePath (path, PathStrokeType (1.0f));
+        } else {
+            
+            g.setColour(componentIntermediateShadowColour);
+            g.fillRect(bounds);
+            g.setColour(baseColour);
+            
+            g.setColour(componentIntermediateShadowColour);
+//            g.fillPath(topTrapezoid);
+//            g.fillPath(bottomTrapezoid);
+            g.setColour(componentShadowColour.darker());
+            g.fillPath(topTrapezoid);
+            g.fillPath(bottomTrapezoid);
+//            g.fillPath(leftTrapezoid);
+            
+            g.setColour(baseColour);
+            if (button.getToggleState()) {
+//                ColourGradient onGradient = ColourGradient(stringColour, centerPoint, componentFillColour, innerBounds.getTopLeft(), true);
+                ColourGradient onGradient = ColourGradient(stringColour.withAlpha(0.6f), centerPoint, componentFillColour,
+                                                           Point<float>(innerBounds.getRight(),centerPoint.getY()), true);
+                g.setFillType(FillType::FillType(onGradient));
+                g.fillRect(innerBounds);
+                g.setFillType(FillType(findColour(Slider::ColourIds::rotarySliderFillColourId)));
+                g.setColour(baseColour);
+            } else {
+                g.fillRect(innerBounds);
+            }
+            g.setColour(Colours::black.withAlpha(0.4f));
+//            g.drawRect(innerBounds);
+            
+//            g.setColour (button.findColour(ComboBox::outlineColourId));
+            g.setColour(highlightColour.withAlpha(0.4f).brighter());
+            g.drawRect (bounds, 1.0f);
+            g.drawRect(innerBounds);
+            
+            g.drawLine(bounds.getTopLeft().x, bounds.getTopLeft().y, innerBounds.getTopLeft().x, innerBounds.getTopLeft().y);
+            g.drawLine(bounds.getTopRight().x, bounds.getTopRight().y, innerBounds.getTopRight().x, innerBounds.getTopRight().y);
+            g.drawLine(bounds.getBottomLeft().x, bounds.getBottomLeft().y, innerBounds.getBottomLeft().x, innerBounds.getBottomLeft().y);
+            g.drawLine(bounds.getBottomRight().x, bounds.getBottomRight().y, innerBounds.getBottomRight().x, innerBounds.getBottomRight().y);
+        }
     }
     
     void drawTickBox (Graphics& g, Component& component, float x, float y, float w, float h,
@@ -402,10 +513,6 @@ public:
         
         Font font (getToggleButtonFont(button, button.getHeight()));
         
-        const int x = 4;
-        const int y = (int)((button.getHeight() - tickWidth) * 0.5f);
-//        const int totalWidth = ;
-        
         drawTickBox (g, button, 4.0f, (button.getHeight() - tickWidth) * 0.5f,
                      tickWidth, tickWidth,
                      button.getToggleState(),
@@ -420,9 +527,7 @@ public:
             g.setOpacity (0.5f);
         
         const auto textX = roundToInt (tickWidth) + 10;
-        
-//        Rectangle<int> textRect = Rectangle<int>(x, y, );
-        
+                
         g.drawFittedText (button.getButtonText(), textX, 0, button.getWidth() - textX - 2, button.getHeight(), Justification::centredLeft, 10);
     }
     

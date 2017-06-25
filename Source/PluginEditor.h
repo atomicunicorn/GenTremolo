@@ -76,9 +76,8 @@ public:
     
     const int euclidToggleX = 6;
     const int euclidToggleY = 200;
-    const int firstEuclidKnobX = 90;
-    
-    const int standardToggleY = 333;
+//    const int firstEuclidKnobX = 90;
+    const int firstEuclidKnobX = 48;
     
     const int minBeatSliderWidth = 125;
     const int minBeatSliderHeight = 25;
@@ -153,9 +152,10 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment; // TODO remove this
 
     /* Components */
+    TextButton euclidTextButton;
+    TextButton lfoTextButton;
+    
     ToggleButton randomToggleButton;
-    ToggleButton euclidToggleButton;
-    ToggleButton standardToggleButton;
     
     ToggleButton stereoToggleButton;
     

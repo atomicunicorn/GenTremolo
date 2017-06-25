@@ -29,26 +29,29 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     addAndMakeVisible(&testLabel);
     
     /* ------ Automation params and components added here ------ */
+    
+    euclidTextButton.setButtonText("Euclid");
+    euclidTextButton.setRadioGroupId(modeRadioGroupID);
+    euclidTextButton.setToggleState(true, dontSendNotification);
+    euclidTextButton.setClickingTogglesState(true);
+    addAndMakeVisible(&euclidTextButton);
+    euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidTextButton);
+    euclidTextButton.addListener(this);
+    
+    lfoTextButton.setButtonText("LFO");
+    lfoTextButton.setRadioGroupId(modeRadioGroupID);
+    lfoTextButton.setToggleState(false, dontSendNotification);
+    lfoTextButton.setClickingTogglesState(true);
+    addAndMakeVisible(&lfoTextButton);
+    standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", lfoTextButton);
+    lfoTextButton.addListener(this);
+    
+    
     randomToggleButton.setButtonText ("Random");
     randomToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getSecondarySectionColour());
     addAndMakeVisible (&randomToggleButton);
     randomAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "randomParamID", randomToggleButton);
     randomToggleButton.addListener(this);
-    
-    euclidToggleButton.setButtonText("Euclidean");
-    euclidToggleButton.setRadioGroupId(modeRadioGroupID);
-    euclidToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
-    euclidToggleButton.setToggleState(true, dontSendNotification);
-    addAndMakeVisible(&euclidToggleButton);
-    euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidToggleButton);
-    euclidToggleButton.addListener(this);
-    
-    standardToggleButton.setButtonText("LFO");
-    standardToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getSecondarySectionColour());
-    standardToggleButton.setRadioGroupId(modeRadioGroupID);
-    addAndMakeVisible(&standardToggleButton);
-    standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", standardToggleButton);
-    standardToggleButton.addListener(this);
     
     stereoToggleButton.setButtonText("Stereo");
     stereoToggleButton.setColour(ToggleButton::ColourIds::textColourId, dadBodLookAndFeel.getHighlightColour());
@@ -209,7 +212,16 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     
     // TODO fill this out and get it working
-    //dadBodLookAndFeel.drawFromSVG(g, File svgFile, int x, int y, int newWidth, int newHeight)
+//    dadBodLookAndFeel.drawFromSVG(g, (File)dadBodLookAndFeel.svgFilePath, 0, 0, getWidth(), getHeight());
+//    ScopedPointer<XmlElement> svg (XmlDocument::parse(BinaryData::hexmap_half_inch_svg));
+//    if (svg == nullptr) {
+//        return;
+//    }
+//    ScopedPointer<Drawable> d (Drawable::createFromSVG(*svg));
+////    d->setAlwaysOnTop(false);
+////    d->replaceColour(Colours::black, Colours::white);
+//    d->setTransformToFit(Rectangle<float>(0.0f, 0.0f, (float)(getWidth()), ((float)getHeight())), RectanglePlacement::fillDestination);
+//    addAndMakeVisible(d);
 
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
     g.setFont(dadBodLookAndFeel.getTitleTypefacePtr());
@@ -273,9 +285,9 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
 
 void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     if (slider == &minBeatSlider) {
-        if (randomToggleButton.getToggleState() || standardToggleButton.getToggleState())
+        if (lfoTextButton.getToggleState())
             minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
-        if (euclidToggleButton.getToggleState())
+        if (euclidTextButton.getToggleState())
             minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
     }
 }
@@ -317,7 +329,7 @@ String GenTremoloAudioProcessorEditor::getGridBeatString() {
 }
 
 void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
-    if (button == &randomToggleButton || button == &standardToggleButton) {
+    if (button == &randomToggleButton || button == &lfoTextButton) {
         minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
         randomToggleButton.setAlpha(1.0f);
         waveformComboBox.setAlpha(1.0f);
@@ -333,7 +345,7 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
         hhDensityLabel.setAlpha(0.2f);
         stereoToggleButton.setAlpha(0.2f);
     }
-    if (button == &euclidToggleButton) {
+    if (button == &euclidTextButton) {
         minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
         randomToggleButton.setAlpha(0.2f);
         waveformComboBox.setAlpha(0.2f);
@@ -359,7 +371,7 @@ void GenTremoloAudioProcessorEditor::timerCallback() {
 //    } else {
 //        testLabel.setText("off", dontSendNotification);
 //    }
-    testLabel.setText("n: " + String(vFontPtr->getName()), dontSendNotification);
+    testLabel.setText("t: " + String(euclidTextButton.getToggleState()), dontSendNotification);
 }
 
 void GenTremoloAudioProcessorEditor::resized() {
@@ -367,13 +379,14 @@ void GenTremoloAudioProcessorEditor::resized() {
      * subcomponents in your editor.. */
     
     /*** Top Box ***/
-//    chaosSlider.setBounds(chaosSliderX, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
+    euclidTextButton.setBounds(getWidth()/4, getHeight()/6 - getHeight()/16 + 4, getWidth()/6, getHeight()/9);
+    lfoTextButton.setBounds(getWidth()/12*7 + 3, euclidTextButton.getY(), getWidth()/6, getHeight()/9);
+    randomToggleButton.setBounds(lfoTextButton.getX(), lfoTextButton.getY() + lfoTextButton.getHeight() + 6, getWidth()/6, toggleHeight);
+    stereoToggleButton.setBounds(euclidTextButton.getX(), euclidTextButton.getY()+euclidTextButton.getHeight() + 6, getWidth()/6, toggleHeight);
     chaosSlider.setBounds(getWidth()/6*5 - euclidKnobDiameter/2, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
     mixSlider.setBounds(getWidth()/6 - euclidKnobDiameter/2, chaosSliderY - chaosSliderDiameter/6 + 4, euclidKnobDiameter, euclidKnobDiameter);
     
     /*** Euclid Box ***/
-    euclidToggleButton.setBounds(euclidToggleX, euclidToggleY - toggleHeight + 1, getWidth()/6, toggleHeight);
-    stereoToggleButton.setBounds(euclidToggleButton.getX(), euclidToggleButton.getY() + toggleHeight + 4, euclidToggleButton.getWidth(), euclidToggleButton.getHeight());
     kickDensitySlider.setBounds(firstEuclidKnobX, euclidKnobY, euclidKnobDiameter, euclidKnobDiameter);
     snareDensitySlider.setBounds(kickDensitySlider.getX() + knobXOffset, euclidKnobY, euclidKnobDiameter, euclidKnobDiameter);
     hhDensitySlider.setBounds(snareDensitySlider.getX() + knobXOffset, euclidKnobY, euclidKnobDiameter, euclidKnobDiameter);
@@ -383,9 +396,6 @@ void GenTremoloAudioProcessorEditor::resized() {
     /*** LFO Box ***/
     waveformComboBox.setBounds(waveformX, lfoBoxY - getHeight()/14, getWidth()/4, getHeight()/7);
     testLabel.setBounds(waveformComboBox.getX(), waveformComboBox.getY() - waveformComboBox.getHeight()/2 - 7, waveformComboBox.getWidth(), waveformComboBox.getHeight());
-    
-    standardToggleButton.setBounds(euclidToggleX, standardToggleY - toggleHeight + 1, getWidth()/5, toggleHeight);
-    randomToggleButton.setBounds(euclidToggleX, standardToggleButton.getY() + toggleHeight + 4, getWidth()/5, toggleHeight);
     
     minBeatLabel.setBounds(getWidth()/2 - 70, lfoBoxY - 10, 140, 20);
     minBeatSlider.setBounds(getWidth()/2 - minBeatSliderWidth/2, lfoBoxY - minBeatSliderHeight/2, minBeatSliderWidth, minBeatSliderHeight);
