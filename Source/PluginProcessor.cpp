@@ -34,7 +34,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     trem_waveform_indicator = kWaveformSquareSlopedEdges; //kWaveformSine;
     trem_lfo_phase = 0.0;
     isRandom = false;
-    isStandard = true;
+    isStandard = false;
     isStereo = false;
     minBeat = k64th;
     maxBeat = k2;
@@ -44,26 +44,30 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     /* Initialize and add the parameters */
     
-    // TODO use the value to text function to set the label to either on or off for automation
+    // TODO fix automation text representations in host (may be just a problem with Ableton integration)
     parameters.createAndAddParameter("randomParamID", "Random", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, [](float value)
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                     [](float v) -> String { return v < 0.5f ? "Off" : "On";},
+                                     [](const String& s) -> float { if (s == "Off"){return 0.0f;} if(s =="On"){return 1.0f;}return 0.0f;} );
+    parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f,
+                                     [](float value)
                                      {
-                                         // value to text function
-                                         return value < 0.5 ? "Off" : "On";
+                                         if(value == 0.0f) return "Off";
+                                         if(value == 1.0f) return "On";
+                                         return "";
                                      },
                                      [](const String& text)
                                      {
-                                         // text to value function
-                                         if (text == "Off")    return 0.0f;
-                                         if (text == "On")  return 1.0f;
+                                         if(text == "Off") return 0.0f;
+                                         if(text == "On") return 1.0f;
                                          return 0.0f;
                                      });
-    parameters.createAndAddParameter("euclidParamID", "Euclid", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 1.0f, nullptr, nullptr);
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, nullptr, nullptr);
     parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
+    parameters.createAndAddParameter("mixParamID", "Mix", String(), NormalisableRange<float> (0.0f, 1.0f), 1.0f, nullptr, nullptr);
     parameters.createAndAddParameter("kickDensityParamID", "Kick Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
     parameters.createAndAddParameter("snareDensityParamID", "Snare Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
     parameters.createAndAddParameter("hhDensityParamID", "HH Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
@@ -79,7 +83,7 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     
     /* EuclidGrid setup */  // TODO integrate user parameters here!
     euclidGrid = new EuclidGrid();
-    isEuclid = false;
+    isEuclid = true;
     isPlayingEuclidNote = false;
     samplesLeftInCurrentEuclidNote = 0;
     euclidBeatDivisor = 8; // default to 32nd note length
@@ -93,6 +97,18 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
 GenTremoloAudioProcessor::~GenTremoloAudioProcessor()
 {
     // TODO make sure that we don't need to delete the EuclidGrid object explicitly.
+}
+
+String GenTremoloAudioProcessor::toggleButtonParameterValueToString(float rawValue) {
+    return rawValue < 0.5f ? "Off" : "On";
+}
+
+float GenTremoloAudioProcessor::toggleButtonStringToParameterRawValue(String toggleButtonString) {
+    if (toggleButtonString == "Off")
+        return 0.0f;
+    if (toggleButtonString == "On");
+        return 1.0f;
+    return 0.0f;
 }
 
 //==============================================================================
@@ -303,6 +319,7 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     /* Read user-controlled parameters */
     const float rawChaosParamValue = *parameters.getRawParameterValue("chaosParamID");
     const float rawBeatParamValue = *parameters.getRawParameterValue("minBeatParamID");
+    const float rawMixParamValue = *parameters.getRawParameterValue("mixParamID");
     isRandom = *parameters.getRawParameterValue("randomParamID") < 0.5f ? false : true;
     isStandard = *parameters.getRawParameterValue("standardParamID") < 0.5f ? false : true;
     isEuclid = *parameters.getRawParameterValue("euclidParamID") < 0.5f ? false : true;
@@ -311,9 +328,9 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     euclidGrid->setMapX((int)roundf(*parameters.getRawParameterValue("mapXParamID")*126.0f));
     euclidGrid->setMapY((int)roundf(*parameters.getRawParameterValue("mapYParamID")*126.0f));
     euclidGrid->setRandomness((int)roundf(rawChaosParamValue * 126.0f));
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")), kickIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")), snareIndex);
-    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")), hhIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("kickDensityParamID")*126.0f), kickIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("snareDensityParamID")*126.0f), snareIndex);
+    euclidGrid->setDensity((int)roundf(*parameters.getRawParameterValue("hhDensityParamID")*126.0f), hhIndex);
     
     minBeat = getBeatIndicatorFromParam(rawBeatParamValue);
     euclidBeatDivisor = beatIndicatorToEuclidBeatDivisor(rawBeatParamValue);
