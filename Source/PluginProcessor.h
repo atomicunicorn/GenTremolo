@@ -149,6 +149,8 @@ private:
     ScopedPointer<EuclidGrid> euclidGrid;
     float volumeRampMultiplier;
     float euclidNoteAmplitude;
+    float outAmplitudeLeft;
+    float outAmplitudeRight;
     
     float leftVolumeRampMultiplier;
     float rightVolumeRampMultiplier;

@@ -344,6 +344,8 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumOutputChannels = GenTremoloAudioProcessor::getTotalNumOutputChannels();
     float* channelDataLeft = buffer.getWritePointer(0);
     float* channelDataRight = buffer.getWritePointer(1);
+    float leftConvolvedSample;
+    float rightConvolvedSample;
     
     /* Initialize internal parameters */
     int randVal = 1;  // TODO make randVal remember its state
@@ -376,6 +378,8 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 
                 const float inLeft = channelDataLeft[i];
                 const float inRight = channelDataRight[i];
+                float preMixLeftAmplitude;
+                float preMixRightAmplitude;
                 
                 /*** Random Tremolo Preparation ***/
                 if (isRandom && (randSampleCounter % samplesPerBeatIndicator*chaosIntervalSize) == 0) {
@@ -394,15 +398,19 @@ void GenTremoloAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     }
                     /* Keep track of progress on current euclid note and update if it is finished playing. */
                     updateEuclidAmplitudeAndNoteLength(volumeRampSampleLength, samplesPer32ndNote);
-                    channelDataLeft[i] = inLeft * leftEuclidNoteAmplitude;
-                    channelDataRight[i] = inRight * rightEuclidNoteAmplitude;
+                    preMixLeftAmplitude = leftEuclidNoteAmplitude;
+                    preMixRightAmplitude = rightEuclidNoteAmplitude;
                 }
                 
                 /*** Non Euclidean Tremolo ***/
                 if (!isEuclid) { // non euclidean logic
-                    channelDataLeft[i] = inLeft * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
-                    channelDataRight[i] = inRight * (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
+                    preMixLeftAmplitude = (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
+                    preMixRightAmplitude = (1.0f - trem_depth*lfo(temp_trem_lfo_phase_copy, trem_waveform_indicator));
                 }
+                leftConvolvedSample = inLeft * preMixLeftAmplitude;
+                rightConvolvedSample = inRight * preMixRightAmplitude;
+                channelDataLeft[i] = inLeft * (1.0f - rawMixParamValue) + leftConvolvedSample * rawMixParamValue;
+                channelDataRight[i] = inRight * (1.0f - rawMixParamValue) + rightConvolvedSample * rawMixParamValue;
                 
                 /* Update the carrier and LFO phases, keeping them in the range 0-1 */
                 temp_trem_lfo_phase_copy += trem_frequency*sampleFrequency;
