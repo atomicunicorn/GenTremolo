@@ -143,13 +143,13 @@ private:
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> chaosAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> minBeatAttachment;
+    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment;
     
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> kickDensityAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> snareDensityAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> hhDensityAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapXAttachment;
     ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> mapYAttachment;
-    ScopedPointer<AudioProcessorValueTreeState::SliderAttachment> euclidBeatAttachment; // TODO remove this
 
     /* Components */
     TextButton euclidTextButton;
@@ -179,6 +179,9 @@ private:
     
     Label minBeatLabel;
     Slider minBeatSlider;
+    
+    Label euclidBeatLabel;
+    Slider euclidBeatSlider;
     
     Label testLabel;
     

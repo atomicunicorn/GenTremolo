@@ -133,6 +133,24 @@ public:
     static String toggleButtonParameterValueToString(float rawValue);
     static float toggleButtonStringToParameterRawValue(String toggleButtonString);
     
+    static String buttonValueToText (float value) {
+        return value < 0.5 ? "Off" : "On";
+    }
+    
+    static float buttonTextToValue (const String& text) {
+        if (text == "Off")    return 0.0f;
+        if (text == "On")  return 1.0f;
+        return 0.0f;
+    }
+    
+//    static String euclidParameterToText (float value) {
+//        return String((int)roundf(value*126.0f));
+//    }
+//    
+//    static float euclidTextToValue (const String& text) {
+//        return
+//    }
+    
 
 private:
     /* Audio Parameters */

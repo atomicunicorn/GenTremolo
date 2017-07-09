@@ -32,7 +32,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     euclidTextButton.setButtonText("Euclid");
     euclidTextButton.setRadioGroupId(modeRadioGroupID);
-    euclidTextButton.setToggleState(true, dontSendNotification);
     euclidTextButton.setClickingTogglesState(true);
     addAndMakeVisible(&euclidTextButton);
     euclidAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "euclidParamID", euclidTextButton);
@@ -40,7 +39,6 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     lfoTextButton.setButtonText("LFO");
     lfoTextButton.setRadioGroupId(modeRadioGroupID);
-    lfoTextButton.setToggleState(false, dontSendNotification);
     lfoTextButton.setClickingTogglesState(true);
     addAndMakeVisible(&lfoTextButton);
     standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", lfoTextButton);
@@ -159,15 +157,25 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     minBeatSlider.setSliderStyle(Slider::IncDecButtons);
     minBeatSlider.setRange(0, 4, 1);
-    minBeatSlider.setValue(0);
+    minBeatSlider.setValue(2);
     minBeatSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
     addAndMakeVisible(&minBeatSlider);
     minBeatSlider.addListener(this);
-    minBeatLabel.setText("Min beat: 1/4", dontSendNotification);
     minBeatLabel.setJustificationType(Justification::centredBottom);
     minBeatLabel.attachToComponent(&minBeatSlider, false);
     addAndMakeVisible(&minBeatLabel);
     minBeatAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "minBeatParamID", minBeatSlider);
+    
+    euclidBeatSlider.setSliderStyle(Slider::IncDecButtons);
+    euclidBeatSlider.setRange(0, 4, 1);
+    euclidBeatSlider.setValue(0);
+    euclidBeatSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    addAndMakeVisible(&euclidBeatSlider);
+    euclidBeatSlider.addListener(this);
+    euclidBeatLabel.setJustificationType(Justification::centredBottom);
+    euclidBeatLabel.attachToComponent(&euclidBeatSlider, false);
+    addAndMakeVisible(&euclidBeatLabel);
+    minBeatAttachment = new AudioProcessorValueTreeState::SliderAttachment(valueTreeState, "euclidBeatParamID", euclidBeatSlider);
     
     /* non audioparameter combo boxes */
     waveformComboBox.addItem("sine", 1);
@@ -181,20 +189,41 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     
     startTimer(300);
     
-    minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
-    randomToggleButton.setAlpha(0.2f);
-    waveformComboBox.setAlpha(0.2f);
-    mapXSlider.setAlpha(1.0f);
-    mapXLabel.setAlpha(1.0f);
-    mapYSlider.setAlpha(1.0f);
-    mapYLabel.setAlpha(1.0f);
-    kickDensitySlider.setAlpha(1.0f);
-    kickDensityLabel.setAlpha(1.0f);
-    snareDensitySlider.setAlpha(1.0f);
-    snareDensityLabel.setAlpha(1.0f);
-    hhDensitySlider.setAlpha(1.0f);
-    hhDensityLabel.setAlpha(1.0f);
-    stereoToggleButton.setAlpha(1.0f);
+    if (euclidTextButton.getToggleState()) {
+        minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
+        minBeatSlider.setAlpha(0.2f);
+        euclidBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+        euclidBeatSlider.setAlpha(1.0f);
+        randomToggleButton.setAlpha(0.2f);
+        waveformComboBox.setAlpha(0.2f);
+        mapXSlider.setAlpha(1.0f);
+        mapXLabel.setAlpha(1.0f);
+        mapYSlider.setAlpha(1.0f);
+        mapYLabel.setAlpha(1.0f);
+        kickDensitySlider.setAlpha(1.0f);
+        kickDensityLabel.setAlpha(1.0f);
+        snareDensitySlider.setAlpha(1.0f);
+        snareDensityLabel.setAlpha(1.0f);
+        hhDensitySlider.setAlpha(1.0f);
+        hhDensityLabel.setAlpha(1.0f);
+        stereoToggleButton.setAlpha(1.0f);
+    } else {
+        minBeatSlider.setAlpha(1.0f);
+        randomToggleButton.setAlpha(1.0f);
+        waveformComboBox.setAlpha(1.0f);
+        mapXSlider.setAlpha(0.2f);
+        mapXLabel.setAlpha(0.2f);
+        mapYSlider.setAlpha(0.2f);
+        mapYLabel.setAlpha(0.2f);
+        kickDensitySlider.setAlpha(0.2f);
+        kickDensityLabel.setAlpha(0.2f);
+        snareDensitySlider.setAlpha(0.2f);
+        snareDensityLabel.setAlpha(0.2f);
+        hhDensitySlider.setAlpha(0.2f);
+        hhDensityLabel.setAlpha(0.2f);
+        stereoToggleButton.setAlpha(0.2f);
+        euclidBeatSlider.setAlpha(0.2f);
+    }
     
 }
 
@@ -206,25 +235,12 @@ GenTremoloAudioProcessorEditor::~GenTremoloAudioProcessorEditor()
 void GenTremoloAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-    
-    // TODO fill this out and get it working
-//    dadBodLookAndFeel.drawFromSVG(g, (File)dadBodLookAndFeel.svgFilePath, 0, 0, getWidth(), getHeight());
-//    ScopedPointer<XmlElement> svg (XmlDocument::parse(BinaryData::hexmap_half_inch_svg));
-//    if (svg == nullptr) {
-//        return;
-//    }
-//    ScopedPointer<Drawable> d (Drawable::createFromSVG(*svg));
-////    d->setAlwaysOnTop(false);
-////    d->replaceColour(Colours::black, Colours::white);
-//    d->setTransformToFit(Rectangle<float>(0.0f, 0.0f, (float)(getWidth()), ((float)getHeight())), RectanglePlacement::fillDestination);
-//    addAndMakeVisible(d);
 
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
     g.setFont(dadBodLookAndFeel.getTitleTypefacePtr());
     g.setFont(dadBodLookAndFeel.getTitleFontSize());
     Rectangle<int> topBoxArea = Rectangle<int>(6, 6, getWidth() - 12, 133);
     Rectangle<int> titleShadowArea = Rectangle<int>(4, 7, getWidth() - 12, 133);
-//    g.drawFittedText("Gen Tremolo 0.0.1", getLocalBounds(), Justification::centredTop, 1);
     g.setColour(dadBodLookAndFeel.getHighlightColour());
     g.drawFittedText("Gen Tremolo 0.0.1", titleShadowArea, Justification::centredTop, 1);
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
@@ -281,10 +297,10 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
 
 void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     if (slider == &minBeatSlider) {
-        if (lfoTextButton.getToggleState())
-            minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
-        if (euclidTextButton.getToggleState())
-            minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+        minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
+    }
+    if (slider == &euclidBeatSlider) {
+        euclidBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
     }
 }
 
@@ -325,8 +341,8 @@ String GenTremoloAudioProcessorEditor::getGridBeatString() {
 }
 
 void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
-    if (button == &randomToggleButton || button == &lfoTextButton) {
-        minBeatLabel.setText("Min beat: " + getMinBeatString(), dontSendNotification);
+    if (button == &lfoTextButton) {
+        minBeatSlider.setAlpha(1.0f);
         randomToggleButton.setAlpha(1.0f);
         waveformComboBox.setAlpha(1.0f);
         mapXSlider.setAlpha(0.2f);
@@ -340,9 +356,10 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
         hhDensitySlider.setAlpha(0.2f);
         hhDensityLabel.setAlpha(0.2f);
         stereoToggleButton.setAlpha(0.2f);
+        euclidBeatSlider.setAlpha(0.2f);
     }
     if (button == &euclidTextButton) {
-        minBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+        euclidBeatSlider.setAlpha(1.0f);
         randomToggleButton.setAlpha(0.2f);
         waveformComboBox.setAlpha(0.2f);
         mapXSlider.setAlpha(1.0f);
@@ -356,6 +373,7 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
         hhDensitySlider.setAlpha(1.0f);
         hhDensityLabel.setAlpha(1.0f);
         stereoToggleButton.setAlpha(1.0f);
+        minBeatSlider.setAlpha(0.2f);
     }
 }
 
