@@ -40,6 +40,8 @@ public:
     Colour vwComponentFillColour;
     Colour vwComponentShadowColour;
     
+    const float componentFillContrast = 0.1f;
+    
     /* svg files */
     String svgFilePath = "/Users/zig/git_stuff/GenTremolo/hexmap_half_inch.svg";
     
@@ -314,7 +316,11 @@ public:
         g.strokePath(arcPath3, PathStrokeType(lightArcThickness));
         
         // inline
-        g.setColour(findColour(Slider::ColourIds::rotarySliderFillColourId));
+        if (slider.isMouseOverOrDragging()) {
+            g.setColour(findColour(Slider::ColourIds::rotarySliderFillColourId).contrasting(componentFillContrast));
+        } else {
+            g.setColour(findColour(Slider::ColourIds::rotarySliderFillColourId));
+        }
         g.fillEllipse(innerRx, innerRy, innerRw, innerRw);
         g.setColour(softOutlineColour);
         g.drawEllipse(innerRx, innerRy, innerRw, innerRw, smallLineWidth);
@@ -380,6 +386,7 @@ public:
                                       ! button.isConnectedOnRight(),
                                       ! button.isConnectedOnLeft(),
                                       ! button.isConnectedOnRight());
+//            path.addRectangle (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
             
             g.fillPath (path);
             
@@ -465,7 +472,7 @@ public:
         g.fillPath(leftTriangle);
         
         if (isButtonDown || isMouseOverButton) {
-            g.setColour(componentFillColour.brighter());
+            g.setColour(componentFillColour.contrasting(componentFillContrast));
         } else {
             g.setColour(componentFillColour);
         }
@@ -529,7 +536,8 @@ public:
         g.fillRoundedRectangle (boxBounds.toFloat(), cornerSize);
         
         g.setColour (box.findColour (ComboBox::outlineColourId));
-        g.drawRoundedRectangle (boxBounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
+//        g.drawRoundedRectangle (boxBounds.toFloat().reduced (0.5f, 0.5f), cornerSize, 1.0f);
+        g.drawRect(boxBounds.toFloat().reduced (0.5f, 0.5f));
         
         Rectangle<int> arrowZone (width - 30, 0, 20, height);
         Path path;
