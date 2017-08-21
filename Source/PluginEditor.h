@@ -94,7 +94,6 @@ public:
     const int waveformX = 354;
     
     /* title box coords */
-    const int titleBoxBottom = 20;
     const int titleBoxY = 10;
     
     /* top box coords */

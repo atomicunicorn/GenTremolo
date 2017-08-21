@@ -116,7 +116,6 @@ public:
     int leftSamplesLeftInCurrentEuclidNote;
     int rightSamplesLeftInCurrentEuclidNote;
     
-    int gridsCallCountValid;
     int euclidSampleCounter;
     int euclidNoteSampleLen;
     int euclidBeatDivisor;
@@ -142,15 +141,6 @@ public:
         if (text == "On")  return 1.0f;
         return 0.0f;
     }
-    
-//    static String euclidParameterToText (float value) {
-//        return String((int)roundf(value*126.0f));
-//    }
-//    
-//    static float euclidTextToValue (const String& text) {
-//        return
-//    }
-    
 
 private:
     /* Audio Parameters */

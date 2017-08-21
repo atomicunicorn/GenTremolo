@@ -417,7 +417,6 @@ public:
                 g.fillRect(innerBounds);
             }
             
-//            g.setColour(highlightColour.withAlpha(0.4f).brighter());
             g.setColour(softOutlineColour);
             g.drawRect (bounds, 1.0f);
             g.setColour(Colours::black);

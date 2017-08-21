@@ -41,7 +41,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     lfoTextButton.setRadioGroupId(modeRadioGroupID);
     lfoTextButton.setClickingTogglesState(true);
     addAndMakeVisible(&lfoTextButton);
-    standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", lfoTextButton);
+//    standardAttachment = new AudioProcessorValueTreeState::ButtonAttachment(valueTreeState, "standardParamID", lfoTextButton);
     lfoTextButton.addListener(this);
     
     
@@ -115,7 +115,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     kickDensitySlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     kickDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, dadBodLookAndFeel.getHighlightColour());
     addAndMakeVisible(&kickDensitySlider);
-    kickDensityLabel.setText("kick d", dontSendNotification);
+    kickDensityLabel.setText("density 1", dontSendNotification);
     kickDensityLabel.setSize(30, 20);
     kickDensityLabel.attachToComponent(&kickDensitySlider, false);
     kickDensityLabel.setJustificationType(Justification::centredBottom);
@@ -128,7 +128,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     snareDensitySlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     snareDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, dadBodLookAndFeel.getHighlightColour());
     addAndMakeVisible(&snareDensitySlider);
-    snareDensityLabel.setText("snare d", dontSendNotification);
+    snareDensityLabel.setText("density 2", dontSendNotification);
     snareDensityLabel.setSize(30, 20);
     snareDensityLabel.attachToComponent(&snareDensitySlider, false);
     snareDensityLabel.setJustificationType(Justification::centredBottom);
@@ -141,7 +141,7 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
     hhDensitySlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, 0, 0);
     hhDensitySlider.setColour(Slider::ColourIds::rotarySliderFillColourId, dadBodLookAndFeel.getHighlightColour());
     addAndMakeVisible(&hhDensitySlider);
-    hhDensityLabel.setText("hh d", dontSendNotification);
+    hhDensityLabel.setText("density 3", dontSendNotification);
     hhDensityLabel.setSize(30, 20);
     hhDensityLabel.attachToComponent(&hhDensitySlider, false);
     hhDensityLabel.setJustificationType(Justification::centredBottom);
@@ -216,8 +216,8 @@ GenTremoloAudioProcessorEditor::GenTremoloAudioProcessorEditor (GenTremoloAudioP
         euclidBeatSlider.setAlpha(0.2f);
     }
     
-    minBeatLabel.setText("LFO beat: " + getMinBeatString(), dontSendNotification);
-    euclidBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+    minBeatLabel.setText("LFO min beat: " + getMinBeatString(), dontSendNotification);
+    euclidBeatLabel.setText("Euclid min beat: " + getGridBeatString(), dontSendNotification);
     
 }
 
@@ -240,16 +240,6 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
     g.drawFittedText("Gen Tremolo 0.0.1", topBoxArea, Justification::centredTop, 1);
     
-    /* the drawn lines here is purely for testing alignment and should be removed for public releases. */
-    g.setColour(dadBodLookAndFeel.getTestGridColour());
-    for (int i = 1; i < 6; i++) {
-        g.drawLine(((float)getWidth())/6.0f*((float) i), 1.0f, ((float)getWidth())/6.0f*((float) i), 399.0f);
-    }
-    g.drawLine(4.0f, ((float)getHeight())/6.0f, ((float)getWidth())-4.0f, ((float)getHeight())/6.0f);
-    g.drawLine(4.0f, ((float)getHeight())/2.0f, ((float)getWidth())-4.0f, ((float)getHeight())/2.0f); // for alignment testing
-    g.drawLine(4.0f, ((float)getHeight())/6.0f*5.0f, ((float)getWidth())-4.0f, ((float)getHeight())/6.0f*5.0f); // for alignment testing
-    /* end test line drawing */
-    
     /* draw top box */
     g.setColour(getLookAndFeel().findColour(Label::ColourIds::textColourId));
     g.drawRoundedRectangle(6.0f, 6.0f, (float)getWidth()-12.0f, 127.0f, cornerSize, dadBodLookAndFeel.mediumLineWidth);
@@ -262,7 +252,6 @@ void GenTremoloAudioProcessorEditor::paint (Graphics& g)
     float lineWidth = (float)getWidth() - 1.0f;
 
     g.setColour(dadBodLookAndFeel.getOpaqueStringColour());
-    g.drawRect(1.0f, (float)titleBoxBottom, lineWidth, 1.0f); // title divider line
     g.drawRect(1.0f, (float)topBoxBottom, lineWidth, 1.0f);   // top box divider line
     g.drawRect(1.0f, (float)euclidBoxBottom, lineWidth, 1.0f); // euclid box divider line
 }
@@ -291,10 +280,10 @@ void GenTremoloAudioProcessorEditor::comboBoxChanged(ComboBox* comboBox) {
 
 void GenTremoloAudioProcessorEditor::sliderValueChanged(Slider* slider) {
     if (slider == &minBeatSlider) {
-        minBeatLabel.setText("LFO beat: " + getMinBeatString(), dontSendNotification);
+        minBeatLabel.setText("LFO min beat: " + getMinBeatString(), dontSendNotification);
     }
     if (slider == &euclidBeatSlider) {
-        euclidBeatLabel.setText("Euclid beat: " + getGridBeatString(), dontSendNotification);
+        euclidBeatLabel.setText("Euclid min beat: " + getGridBeatString(), dontSendNotification);
     }
 }
 
@@ -376,14 +365,8 @@ void GenTremoloAudioProcessorEditor::buttonClicked(Button* button) {
     }
 }
 
-/* For testing purposes */
+/* For testing purposes - remove timer for production releases */
 void GenTremoloAudioProcessorEditor::timerCallback() {
-//    if (processor.isEuclid) {
-//        String labelText = String("b ") + String(processor.euclidBeatDivisor) + String(" s ") + String(processor.euclidStep);
-//        testLabel.setText(labelText, dontSendNotification);
-//    } else {
-//        testLabel.setText("off", dontSendNotification);
-//    }
     testLabel.setText("t: " + String(euclidTextButton.getToggleState()), dontSendNotification);
 }
 

@@ -54,24 +54,54 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
                                      buttonValueToText,
                                      buttonTextToValue);
     parameters.createAndAddParameter("standardParamID", "Standard", String(),
-                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, buttonValueToText,
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                     buttonValueToText,
                                      buttonTextToValue);
-    parameters.createAndAddParameter("stereoParamID", "Stereo", String(), NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f, buttonValueToText, buttonTextToValue);
-    parameters.createAndAddParameter("chaosParamID", "Chaos", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
-    parameters.createAndAddParameter("mixParamID", "Mix", String(), NormalisableRange<float> (0.0f, 1.0f), 1.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("kickDensityParamID", "Kick Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("snareDensityParamID", "Snare Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("hhDensityParamID", "HH Density", String(), NormalisableRange<float> (0.0f, 127.0f), 32.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("mapXParamID", "MapX", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
-    parameters.createAndAddParameter("mapYParamID", "MapY", String(), NormalisableRange<float> (0.0f, 1.0f), 0.5f, nullptr, nullptr);
-    parameters.createAndAddParameter("minBeatParamID", "Min beat", String(), NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f, nullptr, nullptr);
-    parameters.createAndAddParameter("euclidBeatParamID", "Euclid beat", String(), NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f, nullptr, nullptr);
-    
+    parameters.createAndAddParameter("stereoParamID", "Stereo", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                     buttonValueToText,
+                                     buttonTextToValue);
+    parameters.createAndAddParameter("chaosParamID", "Chaos", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f), 0.5f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("mixParamID", "Mix", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f), 1.0f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("kickDensityParamID", "density 1", String(),
+                                     NormalisableRange<float> (0.0f, 127.0f), 32.0f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("snareDensityParamID", "density 2", String(),
+                                     NormalisableRange<float> (0.0f, 127.0f), 32.0f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("hhDensityParamID", "density 3", String(),
+                                     NormalisableRange<float> (0.0f, 127.0f), 32.0f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("mapXParamID", "MapX", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f), 0.5f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("mapYParamID", "MapY", String(),
+                                     NormalisableRange<float> (0.0f, 1.0f), 0.5f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("minBeatParamID", "LFO min beat", String(),
+                                     NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f,
+                                     nullptr,
+                                     nullptr);
+    parameters.createAndAddParameter("euclidBeatParamID", "Euclid min beat", String(),
+                                     NormalisableRange<float> (0.0f, 4.0f, 1.0f), 0.0f,
+                                     nullptr,
+                                     nullptr);
     
     parameters.state = ValueTree (Identifier ("APVTSGenTremolo"));
     
     
-    /* EuclidGrid setup */  // TODO integrate user parameters here!
+    /* EuclidGrid setup */
     euclidGrid = new EuclidGrid();
     isEuclid = true;
     isPlayingEuclidNote = false;
@@ -79,7 +109,6 @@ parameters(*this, nullptr) // TODO point to and set up an undomanager
     euclidBeatDivisor = 8; // default to 32nd note length
     euclidNoteAmplitude = 0.0f;
     euclidStep = 0;
-    gridsCallCountValid = 0; // for testing
     noteStruct = {};
     euclidLinearSmoothedValue.reset(defaultSampleRate, (double)(volumeRampLengthInMs/1000.0));
 }
@@ -434,7 +463,6 @@ void GenTremoloAudioProcessor::updateEuclidGrid() {
     
     if (!isStereo) { // process mono
         if (noteStruct.success && noteStruct.noteOn)
-            gridsCallCountValid++;
         /* check that no euclid note is currently playing and grid did not fail */
         if (!isPlayingEuclidNote) {
             /* check if grid generated a new valid note */
@@ -453,7 +481,6 @@ void GenTremoloAudioProcessor::updateEuclidGrid() {
         rightEuclidNoteAmplitude = euclidNoteAmplitude;
     } else {  // process stereo
         if (stereoNoteStruct.success && (stereoNoteStruct.rightNoteOn || stereoNoteStruct.leftNoteOn)) {
-            gridsCallCountValid++;
             updateEuclidLeft();
             updateEuclidRight();
         }
